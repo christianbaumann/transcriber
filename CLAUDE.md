@@ -22,7 +22,7 @@ Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; no c
     --restrict-filenames -P out/youtube --print after_move:filepath '<url>'
   ```
   URL must name exactly one video; retry once on network error; stop on DRM.
-- Precedent in music-transcriber: both skills are vendored into `.claude/skills/` (video-slicer with a provenance comment naming the source commit) and run as one subagent each, the orchestrator briefing them with absolute paths (`music-transcriber/.claude/skills/transcribing-sheet-music/references/youtube-input.md`). The slicer's default review rules (drop demo frames, repeats, earlier build steps) fit talks, so unlike music-transcriber no rule override is needed.
+- Precedent in music-transcriber: both skills are vendored into `.claude/skills/` (video-slicer with a provenance comment naming the source commit) and run as one subagent each, the orchestrator briefing them with absolute paths (`music-transcriber/.claude/skills/transcribing-sheet-music/references/youtube-input.md`). Like music-transcriber, the slicer brief overrides the slicer's step 5 (review): each candidate gets the transcript excerpt of its time range, demo frames (IDE, terminal, browser) are kept when the speaker refers to them, otherwise the slicer's own rules apply (drop repeats, earlier build steps). The override must track changes to the slicer's step 5.
 
 ## Packaging as a skill
 
