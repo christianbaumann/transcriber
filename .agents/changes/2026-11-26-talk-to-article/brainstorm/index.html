@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talk to Article: Brainstorm</title>
+<style>
+  body { font: 15px/1.5 -apple-system, system-ui, sans-serif; max-width: 1100px; margin: 2rem auto; padding: 0 16px; color: #222; background: #fff; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2.5rem; border-top: 1px solid #ddd; padding-top: 1rem; }
+  img { max-width: 100%; border: 1px solid #ddd; border-radius: 6px; margin: .5rem 0; }
+  ol.opts { list-style: none; padding-left: 0; }
+  ol.opts li { margin: .3rem 0; }
+  .best { font-weight: 600; }
+  .ctx { color: #555; }
+  .legend span { display: inline-block; padding: 2px 8px; border-radius: 4px; margin-right: 6px; border: 1px solid; font-size: 13px; }
+</style>
+</head>
+<body>
+<h1>Talk to Article: Brainstorm</h1>
+<p class="legend">
+  <span style="background:#dae8fc;border-color:#6c8ebf">script / tool</span>
+  <span style="background:#d5e8d4;border-color:#82b366">subagent</span>
+  <span style="background:#fff2cc;border-color:#d6b656">LLM judgment</span>
+  <span style="background:#f8cecc;border-color:#b85450">user gate</span>
+  <span style="background:#e1d5e7;border-color:#9673a6">output</span>
+</p>
+
+<h2>Pipeline (current understanding)</h2>
+<img src="pipeline.png" alt="Pipeline overview" style="max-width:480px">
+
+<h2>1. How does the transcript help select images?</h2>
+<p class="ctx">video-slicer step 5 drops live demo frames (IDE, terminal, browser). Tool screenshots can be worth keeping. Each candidate has a timestamp, which maps to the transcript.</p>
+<img src="q1-image-selection.png" alt="Image selection options">
+<ol class="opts">
+  <li class="best">⭐ a) Option A: transcribe first, run slicer steps 1&ndash;4, override step 5 in the brief (transcript excerpt per candidate; keep demo frames the speaker refers to). Reuses the slicer.</li>
+  <li>b) Option C: own review step after slicer steps 1&ndash;4. Full control, duplicates the slicer's rules.</li>
+  <li>c) Option B: slicer unchanged, filter afterwards. Cannot recover dropped demo frames.</li>
+</ol>
+
+<h2>2. How is the work orchestrated?</h2>
+<img src="q2-orchestration.png" alt="Orchestration options">
+<ol class="opts">
+  <li class="best">⭐ a) Option A: one orchestrator <code>SKILL.md</code>, subagents per phase. Keeps the context of each step small; per-slide and per-chapter work runs in parallel. Same pattern as music-transcriber.</li>
+  <li>b) Option B: one agent does all steps. Simple, but a 45 min talk with 40 slides overflows one context.</li>
+  <li>c) Option C: Python script that calls <code>claude -p</code>. Deterministic order, but hard to add user gates and loses the skill format.</li>
+</ol>
+
+<h2>3. How is the per-slide work split?</h2>
+<p class="ctx">Per slide: read text (vision + tesseract), fix image with ImageMagick, re-create diagram / code / formula / table, note what is not spoken.</p>
+<ol class="opts">
+  <li class="best">⭐ a) One subagent per slide, several in parallel. Input: slide PNG + transcript excerpt for its time range. Output: <code>slides/NNNN.md</code> (slide text, kind, unspoken content, re-created assets, ImageMagick commands).</li>
+  <li>b) One subagent per batch of about 10 slides. Fewer agents, less parallel.</li>
+  <li>c) The orchestrator does all slides. Context overflow on long talks.</li>
+</ol>
+
+<h2>4. How is the article written?</h2>
+<img src="q5-article-writing.png" alt="Article writing flow">
+<ol class="opts">
+  <li class="best">⭐ a) Outline first (chapters, subchapters, slide and time ranges), then one subagent per chapter in parallel, then one edit pass for a single voice and cross references.</li>
+  <li>b) One agent writes the whole article in one pass. Consistent voice, context limits on long talks.</li>
+  <li>c) Chapter subagents without an edit pass. Fast, uneven style.</li>
+</ol>
+
+<h2>5. Where does the chapter structure come from?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) Both: section and title slides give the frame, transcript topic shifts refine it (also for talks with few slides).</li>
+  <li><strong>Answer: a.</strong> Many decks have no section or title slides. Then the LLM takes the structure from the transcript alone.</li>
+  <li>b) Slides only.</li>
+  <li>c) Transcript only.</li>
+</ol>
+
+<h2>6. How does the user review (info area, re-created items)?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) Local HTML page: original screenshot next to the re-created item, a form per item (ok / fix + comment). Answers go to a localhost server that writes a JSON file the agent reads. Same as music-transcriber's review rule.</li>
+  <li>b) Review version as Markdown; user answers in chat.</li>
+  <li>c) Published Claude artifact with comments.</li>
+</ol>
+
+<h2>7. Scripts and tests?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) Python 3 scripts run with <code>uv</code> (PEP 723 inline deps), pytest via <code>uv run --with pytest</code>; skill evals against one reference talk.</li>
+  <li>b) Python scripts with unit tests only, no evals.</li>
+  <li>c) Shell scripts.</li>
+</ol>
+
+<h2>8. Which reference talk for evals?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) A talk you pick (10&ndash;20 min) that has its slides as PDF: slide recall and content can be checked against the PDF, as in video-slicer's evaluation.</li>
+  <li>b) A public, CC-licensed talk on YouTube, chosen by me.</li>
+  <li>c) No evals for now.</li>
+  <li><strong>Answer: a</strong>, two talks from <code>~/Downloads</code>, slides as .pptx (not PDF):
+    <ul>
+      <li><em>Don't be a fool with a tool</em>: 46 min, 1280x720; deck from askui Hackathon 2023-03, 55 slides</li>
+      <li><em>Extreme learning situations as testers</em> (EclipseCon 2020): 22 min, 1920x1050; 31 slides</li>
+    </ul>
+  </li>
+</ol>
+
+<h2>9. Output folder layout?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) <code>&lt;video&gt;-article/</code>: <code>article.md</code>, <code>article.html</code>, <code>transcript.md</code>, <code>whisper.json</code>, <code>images/</code>, <code>diagrams/</code> (.drawio + export), <code>reference/</code> (original screenshots), <code>imagemagick.log</code>. Work files in a temp dir.</li>
+  <li>b) Same, but work files (slide notes, outline) kept in <code>work/</code> for debugging.</li>
+  <li>c) Flat folder, all files side by side.</li>
+</ol>
+
+<h2>10. Where do the reference talks live?</h2>
+<p class="ctx">Videos are 108 MB and 72 MB; too big for plain git.</p>
+<ol class="opts">
+  <li class="best">⭐ a) Videos and .pptx in gitignored <code>testdata/talks/&lt;name&gt;/</code>; the ground truth derived from them (slide text, slide PNGs) committed next to them.</li>
+  <li>b) Evals point to absolute paths in <code>~/Downloads</code>.</li>
+  <li>c) Git LFS for the videos.</li>
+</ol>
+
+<h2>11. How is ground truth made from the .pptx?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) LibreOffice (<code>soffice</code>, installed) renders each slide to PNG, for checking slide recall; the <code>pptx-to-markdown</code> skill gives slide text and speaker notes, for checking that unspoken slide content reaches the article.</li>
+  <li>b) Slide text only.</li>
+  <li>c) You check the results by hand.</li>
+  <li><strong>Answer:</strong> PDF exports of both decks exist (<code>~/Downloads</code>, 31 and 55 pages, same count as the .pptx). Use the PDFs for slide images, the .pptx for text and notes. Animations: only the askui deck has them, on 7 slides, all entrance effects (20 in total). The PDF shows the final state; the slicer also keeps only the final state of a build, so they match. Earlier build steps are not counted as missed.</li>
+</ol>
+
+<h2>12. The askui deck (2023-03) may not match the recorded talk. How to handle it?</h2>
+<ol class="opts">
+  <li class="best">⭐ a) Map recorded slides to deck slides first; count recall only on matched slides; list unmatched slides on both sides in the eval report.</li>
+  <li>b) Use only the EclipseCon talk for evals.</li>
+  <li>c) Ignore the mismatch.</li>
+  <li><strong>Answer:</strong> the deck is the same as in the recording. Compare 1:1, no mapping step.</li>
+</ol>
+</body>
+</html>
