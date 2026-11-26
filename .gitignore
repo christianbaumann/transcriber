@@ -1,3 +1,6 @@
 out/
 __pycache__/
 .pytest_cache/
+testdata/talks/*/video.mp4
+testdata/talks/*/deck.pptx
+testdata/talks/*/deck.pdf
