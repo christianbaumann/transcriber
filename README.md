@@ -24,7 +24,7 @@ Input is a local video file or a YouTube URL. The skill:
 2. Transcribes the spoken word locally with timestamps
 3. Extracts one image per slide
 4. Reads every slide: fixes the screenshot (lighting, colors, contrast), re-creates diagrams, code, formulas and tables, and notes what is on the slide but not said in the talk
-5. Writes the article: rewritten prose with chapters, lists and quotes, slide content merged in, images at the matching position; memes are always kept; decorative photos the speaker never refers to are left out; the article ends with a short conclusion (the talk's own closing chapter, else a summary of the chapters with no new facts), after any Q&A
+5. Writes the article: rewritten prose with chapters, lists and quotes, slide content merged in, images at the matching position; memes are always kept; decorative photos the speaker never refers to are left out; the article ends with a short conclusion (the talk's own closing chapter, else a summary of the chapters with no new facts); a Q&A is left out
 
 You are asked twice along the way:
 

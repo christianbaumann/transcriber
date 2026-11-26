@@ -40,8 +40,8 @@ Done when: you know the talk's topics in order and which slides, if any, carry s
 - Chapter title: names the topic in 2 to 6 words, derived from what the speaker says, not from a photo.
 - Give the article a title: the title slide's text, else the speaker's introduction ("my talk ..."), else the transcript's topic. `OUTLINE` states it; the info area may replace it.
 - Ranges tile the talk: the first range starts at the first spoken word, each range ends where the next begins, the last ends at the end of the transcript. Times are `[HH:MM:SS]` of transcript paragraphs; slide numbers from the `→ slide` markers (`slides 3-9`: first slide shown in the range to last). A slide shown across a boundary belongs to the range where it first appears.
-- Opening (greeting, who the speaker is, what the talk is about) and closing (thanks, questions): keep what has content as the first or last chapter (the motivation or the summary), drop the rest by listing the range under `Not in article`.
-- The article ends with a conclusion. When the talk has a summary or closing chapter of its own, title it `Conclusion` (German `Fazit`); it is the conclusion. Otherwise the outline gets no conclusion chapter: the edit pass writes one. A Q&A chapter stays a chapter of its own and comes before the conclusion.
+- Opening (greeting, who the speaker is, what the talk is about) and closing (thanks, questions): keep what has content as the first or last chapter (the motivation or the summary), drop the rest by listing the range under `Not in article`. A Q&A (questions from the audience and the answers) is never a chapter: list its range under `Not in article` with reason `Q&A`.
+- The article ends with a conclusion. When the talk has a summary or closing chapter of its own, title it `Conclusion` (German `Fazit`); it is the conclusion. Otherwise the outline gets no conclusion chapter: the edit pass writes one.
 
 Done when: every spoken minute is in exactly one chapter range or in `Not in article`; chapter count fits the talk (a chapter is about 2 to 10 minutes, rarely a single paragraph).
 
@@ -177,7 +177,7 @@ Write `ARTICLE`:
 4. One voice: the same person and tense for the speaker's experience reports (third person, past tense), present tense for advice and facts, the same term for the same thing across chapters, consistent list style, the same spelling variant of the language. Rewrite only what differs.
 5. Cross references: where a chapter points to another ("see chapter 3"), use a link to the heading, `[3. Managing expectations](#3-managing-expectations)` (GitHub anchor rule, which the HTML build uses too: lowercase, spaces to hyphens, punctuation removed, digits kept: `## 4.3 Too many arguments` is `#43-too-many-arguments`). Check every target exists; the HTML build fails on a link without a heading.
 6. Transitions: add at most one sentence where a chapter starts without context. No introduction or summary that no chapter contains.
-7. Conclusion: the last `##` chapter is the conclusion (`## N. Conclusion`, German `## N. Fazit`), after any Q&A chapter. If a chapter is the talk's own summary or closing (titled Summary, Conclusion, Fazit or similar), it is the conclusion: retitle it `Conclusion` / `Fazit` and move a Q&A chapter that follows it before it (renumber, fix links). If none exists, write one as the last chapter: 1 to 2 paragraphs that wrap up the key points of the chapters in the chapters' words, with no new fact, number, name or claim. Its number follows the last chapter. The conclusion holds key points from the chapters only, no logistics: slide sharing, contact details and reading lists stay in their chapter or are dropped. A talk's own summary that becomes the conclusion is condensed to this standard: short, at most one short list plus 1 to 2 paragraphs, no image unless it is the talk's own summary diagram or a meme (memes are always kept).
+7. Conclusion: the last `##` chapter is the conclusion (`## N. Conclusion`, German `## N. Fazit`). If a chapter is the talk's own summary or closing (titled Summary, Conclusion, Fazit or similar), it is the conclusion: retitle it `Conclusion` / `Fazit`. If none exists, write one as the last chapter: 1 to 2 paragraphs that wrap up the key points of the chapters in the chapters' words, with no new fact, number, name or claim. Its number follows the last chapter. The conclusion holds key points from the chapters only, no logistics: slide sharing, contact details and reading lists stay in their chapter or are dropped. A talk's own summary that becomes the conclusion is condensed to this standard: short, at most one short list plus 1 to 2 paragraphs, no image unless it is the talk's own summary diagram or a meme (memes are always kept).
 8. Keep every distinct point, number, name, list, quote, table, formula and image that the chapters have, except exact duplicates. Add no facts.
 
 Done when: the article has the info area, all chapters in order and no point lost.
@@ -186,7 +186,7 @@ Done when: the article has the info area, all chapters in order and no point los
 
 Fix what fails:
 
-1. One `#` heading (the title). Chapter and subchapter numbers run without gaps. The last `##` is the conclusion, after any Q&A chapter, and it contains no logistics.
+1. One `#` heading (the title). Chapter and subchapter numbers run without gaps. The last `##` is the conclusion, and it contains no logistics.
 2. Every image path exists below `OUT`; no path points to a slice folder or `reference/`; no image appears twice.
 3. No paragraph appears twice (check with a short script comparing normalized paragraphs, and sentences of 8 or more words across chapters).
 4. Every link target exists.
