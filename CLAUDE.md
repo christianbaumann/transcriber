@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; only the vendored skills (video-slicer, YouTube download) so far. Update this file once structure, commands and tests exist.
+Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; implementation in progress (task `status` in `tasks/`).
 
 ## Dependencies on sibling projects
 

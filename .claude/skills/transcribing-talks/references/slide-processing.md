@@ -71,7 +71,13 @@ Export next to it:
 drawio -x -f svg -e -b 10 -o "$OUT/diagrams/NNNN-<short-name>.svg" "$OUT/diagrams/NNNN-<short-name>.drawio"
 ```
 
-Read the exported SVG (or export as PNG to a temp file and read that) and compare with the slide. Fix the `.drawio` and re-export until labels, groups and arrows match.
+To compare, export a PNG into a temp dir (`TMP=$(mktemp -d)`) and read it (the SVG uses `light-dark()` colors that ImageMagick and the image reader do not render; keep the SVG as the article asset):
+
+```bash
+drawio -x -f png -b 10 -o "$TMP/NNNN-check.png" "$OUT/diagrams/NNNN-<short-name>.drawio"
+```
+
+Compare it with the slide. Fix the `.drawio` and re-export until labels, groups and arrows match.
 
 Use another format only when it fits clearly better, for example Mermaid for sequence diagrams, simple flowcharts and Gantt. Then keep the source as `NNNN-<short-name>.mmd` and export with `mmdc -i <src> -o <name>.svg`.
 
@@ -81,10 +87,10 @@ Fenced block with language, content exactly as on the slide (indentation, commen
 
 ### Formula
 
-LaTeX in the note body (`$…$` inline, `$$…$$` display) and a rendered image `$OUT/diagrams/NNNN-<short-name>.png`:
+LaTeX in the note body (`$…$` inline, `$$…$$` display) and a rendered image `$OUT/diagrams/NNNN-<short-name>.png` (black text on opaque white, legible on any viewer):
 
 ```bash
-uv run --with matplotlib python -c 'import sys,matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as p; f=p.figure(figsize=(0.1,0.1)); f.text(0,0,"$"+sys.argv[1]+"$",fontsize=28); f.savefig(sys.argv[2],dpi=200,bbox_inches="tight",pad_inches=0.1,transparent=True)' '<latex without dollars>' "$OUT/diagrams/NNNN-<short-name>.png"
+uv run --with matplotlib python -c 'import sys,matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as p; f=p.figure(figsize=(0.1,0.1),facecolor="white"); f.text(0,0,"$"+sys.argv[1]+"$",fontsize=28); f.savefig(sys.argv[2],dpi=200,bbox_inches="tight",pad_inches=0.1,facecolor="white")' '<latex without dollars>' "$OUT/diagrams/NNNN-<short-name>.png"
 ```
 
 matplotlib supports a LaTeX subset. If it fails on a construct, keep the LaTeX in the note, skip the image and say so in your report.
