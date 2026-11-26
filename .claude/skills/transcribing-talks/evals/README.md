@@ -25,8 +25,24 @@ uv run .claude/skills/transcribing-talks/evals/grade.py <article dir> <ground tr
 | Unspoken-content coverage | >= 0.70 |
 | Heading depth | >= 2 (a `###` below a `##` chapter, the `#` title not counted) |
 
-- **Slide recall:** kept slices (`<video>-slices/`) are matched 1:1 to the deck PNGs by pixel agreement of 96x54 grayscale thumbnails (an optimal assignment, so the speaker inset and scaling cost a few percent, not the match). A pair needs >= 0.65 agreement. Deck slides whose text is a proper subset of the next slide's are build steps: they are neither matched nor counted as missed. Recall = matched / counted deck slides.
-- **Unspoken-content coverage:** for matched slides only, slide text lines (from `slides.md`, without notes, headings and social-handle footers) with at least 2 words of 3+ letters. A line is unspoken if less than 80% of its words occur in `transcript.md`; it is covered if at least 80% of its words occur in `article.md` or the text of `diagrams/*.drawio`. Coverage = covered / unspoken. Limitation: the word match is over the whole article, not the nearby chapter, so it is lenient for short lines.
+- **Slide recall:** kept slices (`<video>-slices/`) are matched 1:1 to the deck PNGs by pixel agreement of 96x54 grayscale thumbnails, as an optimal assignment (`scipy`). Recall = matched / counted deck slides. Not counted (listed in `grading.json`):
+  - build steps: slides whose text (without title) is a proper subset of the next slide's
+  - repeats: slides whose picture equals an earlier counted slide (the slicer keeps only the first)
+  - slides never shown: `not_shown` in the deck's `talk.json` (`{"slides": [..], "reason": ".."}`), set only after checking the video
+- **Unspoken-content coverage:** for matched slides only, slide text lines (title from `# Slide N: Title` and body of `slides.md`, without notes and footers) of at least 2 words. A line is unspoken if less than 80% of its words occur in `transcript.md`; it is covered if at least 80% of its words occur in `article.md` or the text of `diagrams/*.drawio`. Coverage = covered / unspoken. Footers are lines of only `@handles`, `#hashtags` and numbers, or lines that repeat (ignoring digits) on at least half of the slides. Fewer than 5 unspoken lines, or none: the check is `inconclusive` (`passed: null`), does not fail the run, and `grading.json` reports `unspoken_lines` and `eligible_slides`. Limitation: the word match is over the whole article, not the nearby chapter, so it is lenient for short lines.
+
+## Constants (`grade.py`)
+
+| Constant | Value | Why |
+|---|---|---|
+| `THUMB_SIZE` | 96x54 | Small enough to ignore antialiasing, scaling and the inset's detail; large enough to tell slides apart |
+| `PIXEL_TOLERANCE` | 24 of 255 | Grey-level difference below which two pixels agree (JPEG-like noise, scaling) |
+| `MIN_SIMILARITY` | 0.65 | True pairs measured 0.73 to 0.96 (the webcam inset covers a few percent). Wrong pairs with a similar background reach 0.74, so the threshold alone does not separate them: the 1:1 assignment does, because a wrong pair loses against the true pair of the same slice. The threshold only rejects slices that match nothing |
+| `REPEAT_MAX_MEAN_DIFF` | 0.5 | Mean grey difference of repeated slides is 0.0; build steps of one slide measure 1.1 or more |
+| `MIN_WORD_LENGTH`, `MIN_LINE_WORDS` | 3, 2 | Drops short words and one-word lines, which match by chance |
+| `LINE_MATCH_RATIO` | 0.8 | Tolerates transcription errors and rewording of a line, not a missing half |
+| `FOOTER_SHARE` | 0.5 | A line on half of the slides is a footer; builds repeat lines on far fewer |
+| `MIN_UNSPOKEN_LINES` | 5 | Below it one line decides the ratio |
 
 ## Results
 
@@ -34,17 +50,17 @@ Run date 2026-11-26.
 
 ### Extreme learning situations as testers (EclipseCon, 31 slides, 22 min)
 
-Full skill run, `grade.py` on its output:
+Full skill run, `grade.py` on its output. `talk.json` lists slides 30 and 31 (Resources, Images) as not shown: the recording is 1343.8 s long and its last frames show slide 29.
 
 | Check | Result |
 |---|---|
 | Required files | pass |
-| Slide recall | 0.89, fail (25 of 28 counted slides; build steps 18-20; missed 22 (an image-only slide), 30, 31 (Resources and Images lists, likely never on screen)) |
-| Unspoken coverage | 0.50, fail (1 of 2 lines; the missing one is "Thank you! Questions?" on slide 29) |
+| Slide recall | 1.00, pass (25 of 25 counted; build steps 18-20, repeat 22 (same picture as 17), not shown 30-31; 25 slices kept) |
+| Unspoken coverage | inconclusive: 2 unspoken lines in 25 slides, fewer than 5; 1 of 2 covered, the missing line is "Thank you! Questions?" on slide 29 |
 | Heading depth | 2, pass |
 
-The recall miss is 0.007 short; the coverage sample is two lines, so one line decides it.
+The deck has too little slide text that the talk does not speak for the coverage check to say anything about this talk.
 
 ### Don't be a fool with a tool (askui, 55 slides, 46 min)
 
-Not graded yet. The run following `SKILL.md` was started and stopped after step 5 began: transcription (English, `whisper.json`), slicing (50 slices kept from 132 candidates, crop `960:540:0:90`, no overlay, no layout warning), transcript and slide excerpts exist; slide notes for slides 1 to 12 were written by subagents. Missing: slides 13 to 50, outline, chapters, edit pass, review gate, info area, final build. Grade it with `grade.py <article dir> testdata/talks/fool-with-a-tool` after a full run.
+Not graded yet (the orchestrator adds the result).

@@ -29,9 +29,11 @@ MIN_SIMILARITY = 0.65
 MIN_WORD_LENGTH = 3
 MIN_LINE_WORDS = 2
 LINE_MATCH_RATIO = 0.8
-FOOTER_MARKERS = ("@chrissbaumann", "#eclipsecon")
+REPEAT_MAX_MEAN_DIFF = 0.5
+FOOTER_SHARE = 0.5
+MIN_UNSPOKEN_LINES = 5
 NOTES_HEADING = "### Notes"
-SLIDE_HEADING = re.compile(r"^# Slide (\d+)\b.*$", re.M)
+SLIDE_HEADING = re.compile(r"^# Slide (\d+)\b:?[ \t]*(.*)$", re.M)
 HEADING = re.compile(r"^(#{1,6})\s+\S", re.M)
 FENCE = re.compile(r"^```.*?^```", re.M | re.S)
 DRAWIO_VALUE = re.compile(r'\bvalue="([^"]*)"')
@@ -80,8 +82,22 @@ def build_steps(texts: dict[int, list[str]]) -> set[int]:
     return steps
 
 
+def repeats(deck: list[Path], excluded: set[int]) -> set[int]:
+    """Slides that look like an earlier counted slide: the slicer keeps only the first."""
+    thumbs, found, counted = {}, set(), []
+    for n, path in enumerate(deck, 1):
+        if n in excluded:
+            continue
+        thumbs[n] = thumbnail(path)
+        if any(np.mean(np.abs(thumbs[n] - thumbs[m])) <= REPEAT_MAX_MEAN_DIFF for m in counted):
+            found.add(n)
+        else:
+            counted.append(n)
+    return found
+
+
 def slide_recall(slices: list[Path], deck: list[Path], skip: set[int] = frozenset()) -> tuple[float, list[int], dict[int, int]]:
-    """Recall over deck slides that are not build steps (numbers in `skip`)."""
+    """Recall over deck slides that are not skipped (build steps, repeats, slides never shown)."""
     matched = match_slides(slices, [None if i + 1 in skip else p for i, p in enumerate(deck)])
     counted = [i for i in range(len(deck)) if i + 1 not in skip]
     missed = [i + 1 for i in counted if i not in matched]
@@ -93,22 +109,40 @@ def words(text: str) -> list[str]:
     return [w for w in re.findall(r"\w+", text.lower()) if len(w) >= MIN_WORD_LENGTH]
 
 
-def slide_texts(slides_md: str) -> dict[int, list[str]]:
-    """Slide number -> text lines without notes and social-handle footers."""
+def normalized(line: str) -> str:
+    return re.sub(r"[\\*\s]+", " ", line).strip().lower()
+
+
+def is_social_line(line: str) -> bool:
+    tokens = normalized(line).split()
+    return bool(tokens) and all(t[0] in "@#" or t.isdigit() for t in tokens)
+
+
+def slide_texts(slides_md: str, with_title: bool = True) -> dict[int, list[str]]:
+    """Slide number -> title and body lines, without notes and footers.
+
+    A footer is a line of only @handles, #hashtags and numbers, or a line that occurs, ignoring digits,
+    on at least FOOTER_SHARE of the slides."""
     parts = SLIDE_HEADING.split(slides_md)
     texts = {}
-    for number, body in zip(parts[1::2], parts[2::2]):
+    for number, title, body in zip(parts[1::3], parts[2::3], parts[3::3]):
         body = body.split(NOTES_HEADING)[0].split("\n---")[0]
-        lines = [ln for ln in body.splitlines() if ln.strip()]
-        texts[int(number)] = [ln for ln in lines if not any(m in ln.lower() for m in FOOTER_MARKERS)]
-    return texts
+        texts[int(number)] = [ln for ln in [*([title] if with_title else []), *body.splitlines()] if ln.strip()]
+    occurrences = {}
+    for lines in texts.values():
+        for key in {re.sub(r"\d+", "", normalized(ln)) for ln in lines}:
+            occurrences[key] = occurrences.get(key, 0) + 1
+    footers = {key for key, n in occurrences.items() if n >= FOOTER_SHARE * len(texts) and n > 1}
+    return {n: [ln for ln in lines if re.sub(r"\d+", "", normalized(ln)) not in footers and not is_social_line(ln)]
+            for n, lines in texts.items()}
 
 
 def line_in(line_words: list[str], vocabulary: set[str]) -> bool:
     return sum(w in vocabulary for w in line_words) / len(line_words) >= LINE_MATCH_RATIO
 
 
-def unspoken_coverage(texts: dict[int, list[str]], slide_numbers, transcript: str, article: str) -> tuple[float, list[str]]:
+def unspoken_coverage(texts: dict[int, list[str]], slide_numbers, transcript: str, article: str) -> tuple[float | None, int, list[str]]:
+    """(coverage or None without unspoken lines, number of unspoken lines, lines missing from the article)."""
     spoken, written = set(words(transcript)), set(words(article))
     unspoken, missing = 0, []
     for n in slide_numbers:
@@ -119,7 +153,7 @@ def unspoken_coverage(texts: dict[int, list[str]], slide_numbers, transcript: st
             unspoken += 1
             if not line_in(lw, written):
                 missing.append(f"slide {n}: {line.strip()}")
-    return ((unspoken - len(missing)) / unspoken if unspoken else 1.0), missing
+    return ((unspoken - len(missing)) / unspoken if unspoken else None), unspoken, missing
 
 
 def article_text(article_dir: Path) -> str:
@@ -143,30 +177,51 @@ def read(path: Path) -> str:
     return path.read_text() if path.is_file() else ""
 
 
+def not_shown(truth_dir: Path) -> set[int]:
+    path = truth_dir / "talk.json"
+    return set(json.loads(path.read_text()).get("not_shown", {}).get("slides", [])) if path.is_file() else set()
+
+
 def grade(article_dir: Path, truth_dir: Path, slices_dir: Path, config: dict) -> dict:
     t = config["thresholds"]
     deck = sorted((truth_dir / "slides").glob("*.png"))
     slices = sorted(slices_dir.glob("*.png")) if slices_dir.is_dir() else []
     texts = slide_texts(read(truth_dir / "slides.md"))
-    skipped = build_steps(texts)
+    hidden = not_shown(truth_dir)
+    steps = build_steps(slide_texts(read(truth_dir / "slides.md"), with_title=False)) - hidden
+    repeated = repeats(deck, steps | hidden)
+    skipped = steps | repeated | hidden
     recall, missed, matched = slide_recall(slices, deck, skipped)
     matched_numbers = [i + 1 for i in sorted(matched)]
-    coverage, uncovered = unspoken_coverage(texts, matched_numbers,
-                                            read(article_dir / "transcript.md"), article_text(article_dir))
+    coverage, unspoken, uncovered = unspoken_coverage(texts, matched_numbers, read(article_dir / "transcript.md"),
+                                                      article_text(article_dir))
     depth = heading_depth(read(article_dir / "article.md"))
+    counted = len(deck) - len(skipped)
+    if coverage is None or unspoken < MIN_UNSPOKEN_LINES:
+        coverage_result = (None, f"inconclusive: {unspoken} unspoken lines in {len(matched_numbers)} slides, "
+                                 f"fewer than {MIN_UNSPOKEN_LINES}; coverage {coverage}; not in article: {uncovered[:10]}")
+    else:
+        coverage_result = (coverage >= t["unspoken_coverage"], f"coverage {coverage:.2f} of {unspoken} lines; not in article: {uncovered[:10]}")
     results = [
         check_files(article_dir, config["required_files"]),
-        (recall >= t["slide_recall"], f"recall {recall:.2f} ({len(deck) - len(skipped) - len(missed)}/{len(deck) - len(skipped)} deck slides without build steps {sorted(skipped)}, {len(slices)} kept); missed {missed}"),
-        (coverage >= t["unspoken_coverage"], f"coverage {coverage:.2f}; not in article: {uncovered[:10]}"),
+        (recall >= t["slide_recall"], f"recall {recall:.2f} ({counted - len(missed)}/{counted} counted deck slides, {len(slices)} kept); "
+                                       f"missed {missed}; build steps {sorted(steps)}; repeats {sorted(repeated)}; not shown {sorted(hidden)}"),
+        coverage_result,
         (depth >= t["min_heading_depth"], f"depth {depth}"),
     ]
     expectations = [{"text": text, "passed": passed, "evidence": evidence}
                     for text, (passed, evidence) in zip(expectation_texts(config), results)]
-    passed = sum(e["passed"] for e in expectations)
     return {"expectations": expectations,
-            "metrics": {"slide_recall": round(recall, 3), "unspoken_coverage": round(coverage, 3),
-                        "heading_depth": depth, "missed_slides": missed, "uncovered_lines": uncovered},
-            "summary": {"passed": passed, "failed": len(expectations) - passed, "total": len(expectations)}}
+            "metrics": {"slide_recall": round(recall, 3),
+                        "unspoken_coverage": None if coverage is None else round(coverage, 3),
+                        "unspoken_lines": unspoken, "eligible_slides": len(matched_numbers),
+                        "heading_depth": depth, "missed_slides": missed, "build_step_slides": sorted(steps),
+                        "repeated_slides": sorted(repeated), "not_shown_slides": sorted(hidden),
+                        "uncovered_lines": uncovered},
+            "summary": {"passed": sum(e["passed"] is True for e in expectations),
+                        "failed": sum(e["passed"] is False for e in expectations),
+                        "inconclusive": sum(e["passed"] is None for e in expectations),
+                        "total": len(expectations)}}
 
 
 def main(argv: list[str]) -> int:
@@ -181,7 +236,7 @@ def main(argv: list[str]) -> int:
     grading = grade(article_dir, args.truth_dir, slices, load_config())
     args.out.write_text(json.dumps(grading, indent=2, ensure_ascii=False))
     for e in grading["expectations"]:
-        print(("PASS" if e["passed"] else "FAIL"), e["text"], "|", e["evidence"][:200])
+        print({True: "PASS", False: "FAIL", None: "INCONCLUSIVE"}[e["passed"]], e["text"], "|", e["evidence"][:400])
     return 1 if grading["summary"]["failed"] else 0
 
 

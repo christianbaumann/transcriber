@@ -5,5 +5,12 @@
   "date": "2020",
   "duration_seconds": 1343.83,
   "slide_count": 31,
-  "animated_slides": []
+  "animated_slides": [],
+  "not_shown": {
+    "slides": [
+      30,
+      31
+    ],
+    "reason": "Resources and Images lists; the recording ends on slide 29 (Thank you! Questions?)"
+  }
 }

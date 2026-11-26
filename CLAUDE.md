@@ -87,7 +87,7 @@ uv run --with pytest --with pyyaml --with numpy --with pillow --with scipy pytes
 ## Evals
 
 - `.claude/skills/transcribing-talks/evals/`: `evals.json` (thresholds and required files in one place, one entry per reference talk), `trigger_evals.json`, `grade.py <article dir> <ground truth dir> [--slices DIR] [--out grading.json]`, README with results. The test in `test_grade.py` keeps `evals.json` expectations equal to `grade.expectation_texts`
-- Slide recall matches kept slices 1:1 to deck PNGs (thumbnail pixel agreement, `scipy` assignment, robust to the webcam inset and scaling); deck slides whose text is a subset of the next slide's are build steps and not counted
+- Metrics, constants and results: [evals README](.claude/skills/transcribing-talks/evals/README.md). `talk.json` may carry `not_shown` (`{slides, reason}`) for deck slides the recording never shows
 
 ## Reference talks
 
