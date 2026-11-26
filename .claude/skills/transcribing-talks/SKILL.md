@@ -22,7 +22,7 @@ Paths (resolve to absolute paths first):
 | `VIDEO` | The video file |
 | `OUT` | `<VIDEO without extension>-article/` (create it) |
 | `SLICES` | `<VIDEO without extension>-slices/` (the slicer's default) |
-| `WORK` | `mktemp -d`. Holds `slide-excerpts/`, `slides/` (slide notes), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Keep it until the end; report its path |
+| `WORK` | `mktemp -d`. Holds `slide-excerpts/`, `slides/` (slide notes), `imagemagick/` (per-slide log fragments), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Keep it until the end; report its path |
 
 Scripts need `uv` and are called as `$SCRIPTS/<name>.py` (PEP 723). If transcription cannot download the model because `~/.cache/huggingface/hub` is unavailable, set `HF_HUB_CACHE` to a writable folder; `mlx_whisper` exits 0 on that failure, so check that `whisper.json` exists.
 
@@ -79,11 +79,17 @@ Done when `transcript.md` has `→ slide NNNN` markers and `slide-excerpts/` has
 
 One subagent per slide, at most `MAX_PARALLEL` at once. Brief:
 
-> Read `<REFS>/slide-processing.md` and follow it. `SLIDE` = `<SLICES>/<file>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` = `<WxH+X+Y or none>`.
+> Read `<REFS>/slide-processing.md` and follow it. `SLIDE` = `<SLICES>/<file>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` = `<WxH+X+Y or none>`, `LOG` = `<WORK>/imagemagick/NNNN.log`.
 
 Collect the replies. A slide whose reply lists a failed check or an unreadable item: note it; do not rerun unless the note is missing.
 
-Done when `$WORK/slides/NNNN.md` exists for every slide in `$SLICES`.
+Then merge the log fragments in slide order (zsh; `(N)` makes an empty match legal, so this also works when no slide needed an edit):
+
+```bash
+for f in "$WORK"/imagemagick/*.log(N); do cat "$f"; done > "$OUT/imagemagick.log"
+```
+
+Done when `$WORK/slides/NNNN.md` exists for every slide in `$SLICES` and `$OUT/imagemagick.log` holds the merged fragments.
 
 ## 6. Info area
 
@@ -150,7 +156,7 @@ Done when `answers.json` exists.
 1. Info: write `answers.info` to `$WORK/info.json` (keys with `null` stay `null`). If it differs from before, rewrite the article's info area at the top of `article.md` (the `# title` line and the bullet list below it, as the edit brief's step 2.1 defines it, labels in `LANGUAGE`, empty values omitted). Change nothing else there.
 2. Fixes: for every slide with at least one item of status `fix`, one subagent, run one after another (they all edit `article.md`). Brief:
 
-   > Read `<REFS>/slide-processing.md`. Redo only the listed items of one slide. `SLIDE` = `<abs>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`. The slide note is `<WORK>/slides/NNNN.md`. Items to fix, each with the user's comment: `<key>: <comment>` ... Apply each comment to the item (step 4 for the re-creation, step 7 and 8 for the note and checks); keep the same file names and leave all other content of the slide as it is. Then edit `<OUT>/article.md` so that the same item (code block, table, formula, diagram image) and every sentence of the article that describes or names it matches the corrected note (search the article for the changed text); change nothing else in the article. Reply with what you changed in the note, the assets and the article.
+   > Read `<REFS>/slide-processing.md`. Redo only the listed items of one slide. `SLIDE` = `<abs>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` as in step 5, `LOG` = `<WORK>/imagemagick/NNNN.log` (after the redo, replace this slide's lines in `<OUT>/imagemagick.log` with the fragment's). The slide note is `<WORK>/slides/NNNN.md`. Items to fix, each with the user's comment: `<key>: <comment>` ... Apply each comment to the item (step 4 for the re-creation, step 7 and 8 for the note and checks); keep the same file names and leave all other content of the slide as it is. Then edit `<OUT>/article.md` so that the same item (code block, table, formula, diagram image) and every sentence of the article that describes or names it matches the corrected note (search the article for the changed text); change nothing else in the article. Reply with what you changed in the note, the assets and the article.
 
 3. Check one fix: the changed item in `article.md` matches the changed note.
 

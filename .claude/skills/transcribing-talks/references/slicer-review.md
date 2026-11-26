@@ -14,7 +14,7 @@ The orchestrator passes the inputs as absolute paths.
 ## Steps
 
 1. Read `$SLICER/SKILL.md`. Run its steps 1 to 4 on `VIDEO` (sample, crop box, detect, contact sheet). Step 3 needs a timeout of at least 10 minutes.
-   - In step 1, also look for a recurring speaker or webcam overlay inside the slide area (a small video inset in a corner on most samples). If a crop box can exclude it without cutting slide content, set the box that way in step 2. Otherwise leave the box and describe the overlay as `WxH+X+Y` in pixels of the exported slices (the crop box's coordinates, not the video's).
+   - In step 1, also look for a recurring speaker or webcam overlay inside the slide area (a small video inset in a corner on most slides). If a crop box can exclude it without cutting slide content, set the box that way in step 2. Otherwise leave the box and describe the overlay as `WxH+X+Y` in pixels of the exported slices (the crop box's coordinates, not the video's).
 2. For each candidate (the map from step 4 gives `#N HH:MM:SS`), write the transcript excerpt of its time range to the work directory: from the candidate's start to the next candidate's start (the last: to the video's end).
 
    ```bash

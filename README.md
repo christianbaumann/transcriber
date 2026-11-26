@@ -39,7 +39,7 @@ A folder `<video>-article/` next to the video; for a YouTube URL next to the dow
 - `article.md` and `article.html` (a single self-contained file, images embedded)
 - the edited images, re-created diagrams with their draw.io sources, the original screenshots for reference, and a log of every image edit
 
-Diagrams are redrawn with draw.io by default (Mermaid where it fits better). Code becomes code blocks, formulas LaTeX, tables Markdown tables. Screenshots appear only where a re-created version cannot replace them, such as photos or tool screenshots; decorative photos the speaker does not refer to are left out.
+Diagrams are redrawn with draw.io by default (Mermaid where it fits better). Code becomes code blocks, formulas LaTeX, tables Markdown tables. Speaker webcam insets are removed from screenshots where they cover no slide content. Screenshots appear only where a re-created version cannot replace them, such as photos or tool screenshots; decorative photos the speaker does not refer to are left out.
 
 The article is written in English or German: the talk's language if it is one of the two, otherwise you choose. You can override it.
 

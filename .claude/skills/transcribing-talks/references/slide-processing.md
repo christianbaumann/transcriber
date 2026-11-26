@@ -12,7 +12,8 @@ Needs `magick` (ImageMagick 7), `tesseract`, `drawio`, `mmdc` (only when a diagr
 | `EXCERPT` | Text file with the transcript of the time range in which this slide is shown. |
 | `OUT` | Article folder (`<video>-article/`). Write only below it. |
 | `NOTES` | Folder for slide notes (work files). The note goes to `$NOTES/NNNN.md`. |
-| `OVERLAY` | Speaker or webcam inset on every slide, as `WxH+X+Y` in the pixels of `SLIDE`, or `none`. |
+| `LOG` | Your own log fragment `$WORK/imagemagick/NNNN.log` (the orchestrator merges the fragments). Create its folder if missing. |
+| `OVERLAY` | Speaker or webcam inset on most slides, as `WxH+X+Y` in the pixels of `SLIDE`, or `none`. |
 
 `NNNN` (slide number) and `HH-MM-SS` come from the slide file name. In the note, `slide` is the number as an integer and `time` is `"HH:MM:SS"`.
 
@@ -117,13 +118,15 @@ Rules:
 
 - Write to `$OUT/images/NNNN.png`; never overwrite `SLIDE`. Create `$OUT/images/` if missing.
 - If no defect needs fixing, copy the file (`cp`) and log the `cp` line with a `# slide NNNN: no defect, copied` line.
-- Run each command exactly as logged (absolute paths) and append it to `$OUT/imagemagick.log` with `>>` (a parallel agent may append too; never rewrite the file; create the log on first use). Format: a `# slide NNNN: <defect and reason>` line, then the command line. Log only commands that succeeded and produced a file.
+- Run each command exactly as logged (absolute paths) and write it to `LOG`, the fragment of this slide only: never touch `$OUT/imagemagick.log` or another slide's fragment. Format: a `# slide NNNN: <defect and reason>` line, then the command line. Log only commands that succeeded and produced a file.
 - A speaker or webcam inset is a recording defect. Remove it when it covers no slide content: fill the region with the color of the surrounding slide background (sample a pixel next to it, `magick ... -fill '<color>' -draw 'rectangle x0,y0 x1,y1'`) or, for a plain edge strip, crop it. When it hides slide content (a photo or picture runs under it), keep it, add `inset kept` to the image note's `[Image: ...]` line and name it in your report. Look at the result: nothing else may change.
+  - Extend the fill 5 to 10 px beyond the inset on its inner edges (the inset's border and scaling leave a line otherwise), staying inside the image.
+  - On a textured or photographic background, copy a patch from directly below or beside the inset instead of a flat fill: `magick SLIDE \( +clone -crop WxH+X+Y +repage \) -geometry +X0+Y0 -composite OUT`. A flat fill shows as a lighter block.
 - Fix defects of the recording (exposure, cast, haze), not the slide's design: a deliberately dark or colored slide stays that way. Aim for a natural look, no extreme values.
-- Look at the result. If it got worse, redo from the original and log the new command (the log keeps the failed attempt, marked `# slide NNNN: discarded`).
+- Look at the result. If it got worse, redo from the original and log the new command (the fragment keeps the failed attempt, marked `# slide NNNN: discarded`, and you may rewrite your own fragment).
 - A slide with `show_screenshot: false` gets no edited image, no log lines and no `images/` file.
 
-Done when: `$OUT/images/NNNN.png` exists, was looked at and is better than the original (or a copy when it had no defect), and every command that produced it is in `imagemagick.log`.
+Done when: `$OUT/images/NNNN.png` exists, was looked at and is better than the original (or a copy when it had no defect), and every command that produced it is in `LOG`.
 
 ## 6. Find what the speaker did not say
 
@@ -170,7 +173,7 @@ Verify, then fix what fails:
 
 1. `SLIDE` unchanged: `md5 -r "$SLIDE"` equals the value from the start.
 2. Every `assets` and `edited_image` file exists; `.drawio` files have a matching export.
-3. `imagemagick.log` holds the commands of this slide's edit (or no entry when `show_screenshot` is false).
-4. You created no files outside `$OUT` and `$NOTES` except temp files, which you delete.
+3. `LOG` holds the commands of this slide's edit (or does not exist when `show_screenshot` is false).
+4. You created no files outside `$OUT`, `$NOTES` and `LOG` except temp files, which you delete.
 
 Report in at most 8 lines (add notes on unclear parts of this brief only when the caller asks for them): slide number, kind, show_screenshot, files written, defects fixed in the image, items you could not read or re-create faithfully, and which check failed (if any).
