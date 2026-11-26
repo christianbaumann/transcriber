@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; no code yet. Update this file once structure, commands and tests exist.
+Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; only the vendored skills (video-slicer, YouTube download) so far. Update this file once structure, commands and tests exist.
 
 ## Dependencies on sibling projects
 
@@ -40,6 +40,14 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Image editing:** article uses the edited images; originals stay in `<video>-slices/`; every ImageMagick command is logged
 - **Review pass:** after approval, the original screenshots of re-created items stay in a reference folder
 - **Info area / title:** fallback order for the title is title slide or speaker's introduction, then file or video name
+
+## Commands
+
+- Slicer tests (needs `ffmpeg`, `ffprobe`; ~30 s), from the repo root:
+  ```bash
+  uv run --with pytest pytest -o pythonpath=.claude/skills/video-slicer/scripts .claude/skills/video-slicer/tests
+  ```
+  The tests live under the vendored skill (not a root `tests/`) so they do not clash with later skill tests; the `-o pythonpath` replaces the source repo's `pyproject.toml` setting. Two path constants in `test_detect.py` and `test_score_pipeline.py` differ from upstream for that layout.
 
 ## Conventions
 
