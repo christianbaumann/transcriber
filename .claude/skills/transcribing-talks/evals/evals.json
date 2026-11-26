@@ -1,0 +1,47 @@
+{
+  "skill_name": "transcribing-talks",
+  "thresholds": {
+    "slide_recall": 0.9,
+    "unspoken_coverage": 0.7,
+    "min_heading_depth": 2
+  },
+  "required_files": [
+    "article.md",
+    "article.html",
+    "transcript.md",
+    "whisper.json",
+    "imagemagick.log"
+  ],
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Turn the recording of my EclipseCon talk, testdata/talks/extreme-learning-eclipsecon/video.mp4, into an article.",
+      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "files": [
+        "../../../testdata/talks/extreme-learning-eclipsecon/video.mp4"
+      ],
+      "ground_truth": "testdata/talks/extreme-learning-eclipsecon",
+      "expectations": [
+        "All required files are present: article.md, article.html, transcript.md, whisper.json, imagemagick.log",
+        "Slide recall is at least 0.9",
+        "Unspoken slide content reaches the article: coverage is at least 0.7",
+        "The article has headings at least 2 levels below the title"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write an article from this talk recording: testdata/talks/fool-with-a-tool/video.mp4",
+      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "files": [
+        "../../../testdata/talks/fool-with-a-tool/video.mp4"
+      ],
+      "ground_truth": "testdata/talks/fool-with-a-tool",
+      "expectations": [
+        "All required files are present: article.md, article.html, transcript.md, whisper.json, imagemagick.log",
+        "Slide recall is at least 0.9",
+        "Unspoken slide content reaches the article: coverage is at least 0.7",
+        "The article has headings at least 2 levels below the title"
+      ]
+    }
+  ]
+}

@@ -66,7 +66,7 @@ Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with 
 
 ```bash
 # tests (no model needed)
-uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scripts/tests
+uv run --with pytest --with pyyaml --with numpy --with pillow --with scipy pytest .claude/skills/transcribing-talks/scripts/tests
 # transcription: writes <dir>/whisper.json, prints language
 .claude/skills/transcribing-talks/scripts/transcribe.py <video> --out <dir> [--language de] [--initial-prompt '<terms>']
 # transcript with slide markers / excerpt of a range
@@ -83,6 +83,11 @@ uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scri
   - `info.json`: object with keys `title`, `event`, `date`, `source`, `duration`, `speaker`; missing, null or empty = gap, shown highlighted
   - Items (keys `<slide>/...`): each `assets` image except `.drawio` (key `<slide>/<asset>`), plus from the note body, as the per-slide brief writes them, each fenced code block, Markdown table and `$$…$$` formula (`code-N`, `table-N`, `formula-N`). Formulas are typeset by KaTeX from a CDN (offline: LaTeX source) and shown with the slide's asset images; such slides get no separate asset items
   - Relative `assets` and `image` paths resolve against `--article` (default: parent of `--notes`)
+
+## Evals
+
+- `.claude/skills/transcribing-talks/evals/`: `evals.json` (thresholds and required files in one place, one entry per reference talk), `trigger_evals.json`, `grade.py <article dir> <ground truth dir> [--slices DIR] [--out grading.json]`, README with results. The test in `test_grade.py` keeps `evals.json` expectations equal to `grade.expectation_texts`
+- Slide recall matches kept slices 1:1 to deck PNGs (thumbnail pixel agreement, `scipy` assignment, robust to the webcam inset and scaling); deck slides whose text is a subset of the next slide's are build steps and not counted
 
 ## Reference talks
 

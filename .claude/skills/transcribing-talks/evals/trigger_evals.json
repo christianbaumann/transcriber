@@ -1,0 +1,16 @@
+[
+  {"query": "Turn ~/Videos/keynote.mp4 into an article", "should_trigger": true},
+  {"query": "Write an article from this conference talk: https://www.youtube.com/watch?v=dQw4w9WgXcQ", "should_trigger": true},
+  {"query": "I recorded my lecture on distributed systems (lecture_07.mkv). I need a transcript with the slides included and a readable write-up", "should_trigger": true},
+  {"query": "Mach aus dem Vortragsvideo ~/Downloads/vortrag.mp4 einen Artikel mit Kapiteln und den Folien", "should_trigger": true},
+  {"query": "Make me notes of this conference session recording, with the diagrams redrawn: ~/talks/session.mp4", "should_trigger": true},
+  {"query": "Can you write up this talk from YouTube as a blog-style article? https://youtu.be/abc123XYZ00", "should_trigger": true},
+  {"query": "Transcribe meeting.mp4 with timestamps, it is a team call, no slides", "should_trigger": false},
+  {"query": "Extract the slides from this lecture video as PNG files, nothing else", "should_trigger": false},
+  {"query": "Download this YouTube video in the best quality: https://www.youtube.com/watch?v=dQw4w9WgXcQ", "should_trigger": false},
+  {"query": "Summarize this blog post in three bullet points: https://example.com/post", "should_trigger": false},
+  {"query": "Convert my slides.pptx to Markdown", "should_trigger": false},
+  {"query": "Write the abstract for my conference talk proposal about test automation", "should_trigger": false},
+  {"query": "Add subtitles in German to movie.mp4 using whisper", "should_trigger": false},
+  {"query": "Transcribe the sheet music scan in score.png into MusicXML", "should_trigger": false}
+]
