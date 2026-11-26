@@ -38,6 +38,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Formulas:** LaTeX (`$…$`/`$$…$$`) and a rendered image
 - **Slide reading:** Claude reads each slide image; `tesseract` OCR as cross-check for small text
 - **Per-slide brief:** `.claude/skills/transcribing-talks/references/slide-processing.md`; the orchestrator passes `SLIDE`, `EXCERPT`, `OUT` (article folder), `NOTES` as absolute paths; one subagent per slide writes `$NOTES/NNNN.md`
+- **Article briefs:** `.claude/skills/transcribing-talks/references/article-writing.md` holds the outline, chapter and edit briefs; the orchestrator passes `TRANSCRIPT`, `NOTES`, `OUT`, `WORK`, `LANGUAGE` (plus `OUTLINE`, `EXCERPT`, `CHAPTER_FILE`, `INFO`, `ARTICLE` per brief) as absolute paths. `transcript.py --excerpt` has no slide markers, so chapter writers also read the range in `transcript.md`. Formulas enter the article as LaTeX only (KaTeX), not as the rendered PNG
 - **Image editing:** article uses the edited images; originals stay in `<video>-slices/`; every ImageMagick command is logged
 - **Review pass:** after approval, the original screenshots of re-created items stay in a reference folder
 - **Info area / title:** fallback order for the title is title slide or speaker's introduction, then file or video name
