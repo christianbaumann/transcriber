@@ -57,6 +57,8 @@ Done when: `kind` is one value from the list.
 - A portrait, stock photo or decorative image counts as `photo`: `true`, because the talk refers to it or sets a mood the writer may use. The writer decides later whether to include it; your job is to provide the edited image.
 - `diagram` slides that are fully labelled are `false` even when curves are only approximated. For `photo`, `screenshot` and visuals that cannot be redrawn faithfully, `true` when unsure.
 
+- A meme (a known meme format, or an image macro or cartoon used for humor) is always `show_screenshot: true`, whatever its `kind` (a meme next to code is `mixed`). Mark it with `meme: true` in the note (see the note format).
+
 Done when: `show_screenshot` is `true` or `false` and consistent with `kind`, `edited_image` and `assets`.
 
 ## 4. Re-create non-text content
@@ -163,6 +165,7 @@ Rules:
 - The seven keys `slide`, `time`, `image`, `kind`, `show_screenshot`, `assets`, `unspoken` appear in the order shown; `edited_image` goes after `assets` and appears only when `show_screenshot` is `true`. `assets: []` when nothing was re-created.
 - `image` is `SLIDE` as passed to you. `assets` and `edited_image` paths are relative to `OUT`. List only files that stay (no temp files). Every listed file exists.
 - Body: the slide text as read in step 1, in reading order, as Markdown. The slide title is a `#` heading. Re-created code, formulas and tables stand in place of their original. For a diagram, add after the text a short description of nodes and relations (`A -> B: label`; for charts: what each curve does) so a reader without the image can follow it. For a non-text picture (photo, portrait, illustration), add one neutral line `[Image: <what is visible>]`; a slide with only pictures has only these lines. No other commentary, no interpretation.
+- `meme: true` goes right after `show_screenshot` and only on slides that show a meme; other notes have no `meme` key. Such a note has `show_screenshot: true` and an `edited_image`.
 - Quote YAML strings that contain `:` or start with a special character.
 
 Done when: the note parses (check with `uv run --with pyyaml python -c` loading the part between the `---` lines), has the keys above, and every path in it exists.

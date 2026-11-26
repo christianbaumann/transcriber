@@ -24,7 +24,7 @@ Input is a local video file or a YouTube URL. The skill:
 2. Transcribes the spoken word locally with timestamps
 3. Extracts one image per slide
 4. Reads every slide: fixes the screenshot (lighting, colors, contrast), re-creates diagrams, code, formulas and tables, and notes what is on the slide but not said in the talk
-5. Writes the article: rewritten prose with chapters, lists and quotes, slide content merged in, images at the matching position; decorative photos the speaker never refers to are left out; the article ends with a short conclusion (the talk's own closing chapter, else a summary of the chapters with no new facts), after any Q&A
+5. Writes the article: rewritten prose with chapters, lists and quotes, slide content merged in, images at the matching position; memes are always kept; decorative photos the speaker never refers to are left out; the article ends with a short conclusion (the talk's own closing chapter, else a summary of the chapters with no new facts), after any Q&A
 
 You are asked twice along the way:
 
@@ -39,7 +39,7 @@ A folder `<video>-article/` next to the video; for a YouTube URL next to the dow
 - `article.md` and `article.html` (a single self-contained file, images embedded)
 - the edited images, re-created diagrams with their draw.io sources, the original screenshots for reference, and a log of every image edit
 
-Diagrams are redrawn with draw.io by default (Mermaid where it fits better). Code becomes code blocks, formulas LaTeX, tables Markdown tables. Speaker webcam insets are removed from screenshots where they cover no slide content. Screenshots appear only where a re-created version cannot replace them, such as photos or tool screenshots; decorative photos the speaker does not refer to are left out.
+Diagrams are redrawn with draw.io by default (Mermaid where it fits better). Code becomes code blocks, formulas LaTeX, tables Markdown tables. Speaker webcam insets are removed from screenshots where they cover no slide content. Screenshots appear only where a re-created version cannot replace them, such as photos or tool screenshots; memes are always kept; decorative photos the speaker does not refer to are left out.
 
 The article is written in English or German: the talk's language if it is one of the two, otherwise you choose. You can override it.
 
