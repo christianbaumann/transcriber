@@ -26,7 +26,7 @@ Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; the 
 
 - `.claude/skills/downloading-youtube-video/`: vendored from music-transcriber (commit named in the provenance comment); only change is `--write-info-json`, so the download yields `out/youtube/<Title>-[<id>].info.json` (`title`, `uploader`, `upload_date`, `webpage_url`, `duration`, `description`) next to the video
 
-- `.claude/skills/transcribing-talks/`: orchestrator. `SKILL.md` has the 12 steps with done criteria; `references/slicer-review.md` overrides the slicer's step 5; `references/slide-processing.md` and `references/article-writing.md` are the subagent briefs
+- `.claude/skills/transcribing-talks/`: orchestrator. `SKILL.md` has steps 0 to 12 with done criteria; `references/slicer-review.md` overrides the slicer's step 5; `references/slide-processing.md` and `references/article-writing.md` are the subagent briefs
 
 ## Decisions
 
@@ -43,6 +43,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Article briefs:** `.claude/skills/transcribing-talks/references/article-writing.md` holds the outline, chapter and edit briefs; the orchestrator passes `TRANSCRIPT`, `NOTES`, `OUT`, `WORK`, `LANGUAGE` (plus `OUTLINE`, `EXCERPT`, `CHAPTER_FILE`, `INFO`, `ARTICLE` per brief) as absolute paths. `transcript.py --excerpt` has no slide markers, so chapter writers also read the range in `transcript.md`.
 - **Image editing:** article uses the edited images; originals stay in `<video>-slices/`; every ImageMagick command is logged
 - **Review pass:** after approval, the original screenshots of re-created items stay in a reference folder
+- **Speaker inset:** the slicer agent crops a webcam overlay out when it can, else reports it as `overlay` (`WxH+X+Y` in slice pixels); the orchestrator passes it as `OVERLAY` to the slide agents, which fill it with the background in edited images when it covers no slide content
 - **Concurrency:** `MAX_PARALLEL = 6` subagents at once (per-slide, per-chapter); fixes after the review run one after another because they edit `article.md`
 - **One `info.json`:** the orchestrator writes `$WORK/info.json` (keys as `review.py` expects) before the outline; it is the edit brief's `INFO` and the review page's `--info`. `answers.json` info values go back into `info.json` and the article's info area; `fix` items are redone by one subagent per slide, which also edits the article (the brief names the changed text so prose that quotes it is updated too)
 - **Review order:** per design the review page comes after the edit pass, so answers are applied to a finished `article.md`
@@ -61,8 +62,6 @@ User-visible behavior (output layout and formats, article language, info area, r
   uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests/test_build_html.py
   ```
 
-- `pipeline.py` (needs `pyyaml`): `slide-excerpts <whisper.json> <slices> --out <dir>`, `chapter-excerpts <whisper.json> <outline.md> --out <dir>`, `reference <notes> <article>` (copies the originals of slides with review items to `<article>/reference/`)
-
 Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`):
 
 ```bash
@@ -79,6 +78,7 @@ uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scri
 - `mlx_whisper` exits 0 when the model download fails (e.g. `~/.cache/huggingface/hub` symlink to an unmounted drive); set `HF_HUB_CACHE` to override
 - `transcribe.py` passes `--condition-on-previous-text False`: with it on, whisper repeated sentences in loops on a 22 min talk; `--initial-prompt` keeps names and terms consistent
 - Excerpt range is `[start, end)` on word start times
+- `pipeline.py` (needs `pyyaml`): `slide-excerpts <whisper.json> <slices> --out <dir>`, `chapter-excerpts <whisper.json> <outline.md> --out <dir>`, `reference <notes> <article>` (copies the originals of slides with review items to `<article>/reference/`)
 - `review.py --notes <slides dir> --info <info.json> --out <dir> [--article <dir>] [--timeout S] [--no-open]`: serves the review page on a free localhost port, writes `<dir>/answers.json` on submit and exits 0; exits 1 on timeout, no file. Prints `Review page: <url>`; the orchestrator opens it for the user and waits for exit, then reads `answers.json` (`{"info": {...}, "items": {"<slide>/<item>": {"status": "ok"|"fix", "comment": ""}}}`)
   - `info.json`: object with keys `title`, `event`, `date`, `source`, `duration`, `speaker`; missing, null or empty = gap, shown highlighted
   - Items (keys `<slide>/...`): each `assets` image except `.drawio` (key `<slide>/<asset>`), plus from the note body, as the per-slide brief writes them, each fenced code block, Markdown table and `$$…$$` formula (`code-N`, `table-N`, `formula-N`). Formulas are typeset by KaTeX from a CDN (offline: LaTeX source) and shown with the slide's asset images; such slides get no separate asset items

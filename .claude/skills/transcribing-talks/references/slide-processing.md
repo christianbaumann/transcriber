@@ -12,6 +12,7 @@ Needs `magick` (ImageMagick 7), `tesseract`, `drawio`, `mmdc` (only when a diagr
 | `EXCERPT` | Text file with the transcript of the time range in which this slide is shown. |
 | `OUT` | Article folder (`<video>-article/`). Write only below it. |
 | `NOTES` | Folder for slide notes (work files). The note goes to `$NOTES/NNNN.md`. |
+| `OVERLAY` | Speaker or webcam inset on every slide, as `WxH+X+Y` in the pixels of `SLIDE`, or `none`. |
 
 `NNNN` (slide number) and `HH-MM-SS` come from the slide file name. In the note, `slide` is the number as an integer and `time` is `"HH:MM:SS"`.
 
@@ -105,7 +106,7 @@ Done when: every re-created item exists, was compared with the slide by looking 
 
 Do this only when `show_screenshot` is `true` (step 3). The article shows only the edited image; the original stays untouched.
 
-Look first: read the image and name the defects (too dark or bright, color cast, low contrast, washed-out, skew, noisy, soft). Choose the smallest set of operations that fixes exactly those. Typical operations:
+Look first: read the image and name the defects (too dark or bright, color cast, low contrast, washed-out, skew, noisy, soft, a speaker or webcam inset at `OVERLAY` or visible elsewhere). Choose the smallest set of operations that fixes exactly those. Typical operations:
 
 - exposure/contrast: `-auto-level`, `-level 5%,95%`, `-brightness-contrast B,C`, `-contrast-stretch 1%x1%`
 - color cast: `-auto-gamma`, `-modulate B,S,H`, `-normalize`
@@ -117,6 +118,7 @@ Rules:
 - Write to `$OUT/images/NNNN.png`; never overwrite `SLIDE`. Create `$OUT/images/` if missing.
 - If no defect needs fixing, copy the file (`cp`) and log the `cp` line with a `# slide NNNN: no defect, copied` line.
 - Run each command exactly as logged (absolute paths) and append it to `$OUT/imagemagick.log` with `>>` (a parallel agent may append too; never rewrite the file; create the log on first use). Format: a `# slide NNNN: <defect and reason>` line, then the command line. Log only commands that succeeded and produced a file.
+- A speaker or webcam inset is a recording defect. Remove it when it covers no slide content: fill the region with the color of the surrounding slide background (sample a pixel next to it, `magick ... -fill '<color>' -draw 'rectangle x0,y0 x1,y1'`) or, for a plain edge strip, crop it. When it hides slide content (a photo or picture runs under it), keep it, add `inset kept` to the image note's `[Image: ...]` line and name it in your report. Look at the result: nothing else may change.
 - Fix defects of the recording (exposure, cast, haze), not the slide's design: a deliberately dark or colored slide stays that way. Aim for a natural look, no extreme values.
 - Look at the result. If it got worse, redo from the original and log the new command (the log keeps the failed attempt, marked `# slide NNNN: discarded`).
 - A slide with `show_screenshot: false` gets no edited image, no log lines and no `images/` file.

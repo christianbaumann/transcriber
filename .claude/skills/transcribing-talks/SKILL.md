@@ -60,6 +60,8 @@ One subagent. Brief:
 
 > Read `<REFS>/slicer-review.md` and follow it. `VIDEO` = `<abs>`, `SLICER` = `<repo>/.claude/skills/video-slicer`, `WHISPER` = `<OUT>/whisper.json`, `TRANSCRIPT_PY` = `<SCRIPTS>/transcript.py`.
 
+Its reply names the crop box and an `overlay` (a speaker or webcam inset it could not crop out, as `WxH+X+Y` in slice pixels, or `none`). Keep it as `OVERLAY` for step 5.
+
 If it reports a layout warning (several slide layouts), pass it to the user and continue with the main layout. If it exports nothing, stop and tell the user why.
 
 Done when `$SLICES/` holds `NNNN_HH-MM-SS.png` files.
@@ -77,7 +79,7 @@ Done when `transcript.md` has `→ slide NNNN` markers and `slide-excerpts/` has
 
 One subagent per slide, at most `MAX_PARALLEL` at once. Brief:
 
-> Read `<REFS>/slide-processing.md` and follow it. `SLIDE` = `<SLICES>/<file>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`.
+> Read `<REFS>/slide-processing.md` and follow it. `SLIDE` = `<SLICES>/<file>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` = `<WxH+X+Y or none>`.
 
 Collect the replies. A slide whose reply lists a failed check or an unreadable item: note it; do not rerun unless the note is missing.
 

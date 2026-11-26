@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -48,3 +49,13 @@ def test_reference_copies_originals_of_slides_with_review_items(tmp_path):
     assert copied
     assert {p.parent for p in copied} == {article / "reference"}
     assert all(p.is_file() for p in copied)
+
+
+def test_cli_writes_slide_excerpts(tmp_path, slices):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS / "pipeline.py"), "slide-excerpts",
+         str(WHISPER), str(slices), "--out", str(tmp_path / "ex")],
+        capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "2 files"
+    assert (tmp_path / "ex" / "0001.txt").is_file()
