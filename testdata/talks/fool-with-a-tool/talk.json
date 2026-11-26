@@ -5,5 +5,22 @@
   "date": "2023-03",
   "duration_seconds": 2781.17,
   "slide_count": 55,
-  "animated_slides": [2, 16, 17, 22, 23, 39, 42]
+  "animated_slides": [
+    2,
+    16,
+    17,
+    22,
+    23,
+    39,
+    42
+  ],
+  "not_shown": {
+    "slides": [
+      52,
+      53,
+      54,
+      55
+    ],
+    "reason": "Ressources and Images lists; from 33:15 to the end (46:21) the recording shows slide 51 (Q&A), no frame of slides 52-55 at 5 s sampling"
+  }
 }

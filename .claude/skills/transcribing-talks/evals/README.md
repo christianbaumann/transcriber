@@ -63,4 +63,13 @@ The deck has too little slide text that the talk does not speak for the coverage
 
 ### Don't be a fool with a tool (askui, 55 slides, 46 min)
 
-Not graded yet (the orchestrator adds the result).
+Full skill run following `SKILL.md` (subagents on sonnet, review gate answered all ok), `grade.py` on its output. 50 slices were kept from 132 slicer candidates; no overlay.
+
+| Check | Result |
+|---|---|
+| Required files | pass |
+| Slide recall | 1.00, pass (50 of 50 counted; repeat 18, not shown 52-55 as explained below; 50 slices kept) |
+| Unspoken coverage | 1.00 of 6 lines, pass but a small sample (6 lines in 50 slides, just above the minimum of 5) |
+| Heading depth | 2, pass |
+
+Slides 52 to 55 (Ressources, Images) were never on screen: sampled every 5 s from 32:40 to the end, the frames show slide 49, 50, then slide 51 (Q&A) from 33:15 until the last seconds, and no frame matches 52 to 55. They are therefore listed under `not_shown` in `talk.json`, added after the first grading, which counted them as missed: recall was 0.93 (50 of 54 counted, missed 52-55, repeat 18) before and is 1.00 (50 of 50) with `not_shown`. Slide 18 is a repeat of slide 12 (same picture).
