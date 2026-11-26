@@ -59,7 +59,7 @@ Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with 
 
 ```bash
 # tests (no model needed)
-uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests
+uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scripts/tests
 # transcription: writes <dir>/whisper.json, prints language
 .claude/skills/transcribing-talks/scripts/transcribe.py <video> --out <dir> [--language de] [--initial-prompt '<terms>']
 # transcript with slide markers / excerpt of a range
@@ -71,6 +71,10 @@ uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests
 - `mlx_whisper` exits 0 when the model download fails (e.g. `~/.cache/huggingface/hub` symlink to an unmounted drive); set `HF_HUB_CACHE` to override
 - `transcribe.py` passes `--condition-on-previous-text False`: with it on, whisper repeated sentences in loops on a 22 min talk; `--initial-prompt` keeps names and terms consistent
 - Excerpt range is `[start, end)` on word start times
+- `review.py --notes <slides dir> --info <info.json> --out <dir> [--article <dir>] [--timeout S] [--no-open]`: serves the review page on a free localhost port, writes `<dir>/answers.json` on submit and exits 0; exits 1 on timeout, no file. Prints `Review page: <url>`; the orchestrator opens it for the user and waits for exit, then reads `answers.json` (`{"info": {...}, "items": {"<slide>/<item>": {"status": "ok"|"fix", "comment": ""}}}`)
+  - `info.json`: object with keys `title`, `event`, `date`, `source`, `duration`, `speaker`; missing, null or empty = gap, shown highlighted
+  - Items (keys `<slide>/...`): each `assets` image except `.drawio` (key `<slide>/<asset>`), plus from the note body, as the per-slide brief writes them, each fenced code block, Markdown table and `$$…$$` formula (`code-N`, `table-N`, `formula-N`). Formulas are typeset by KaTeX from a CDN (offline: LaTeX source) and shown with the slide's asset images; such slides get no separate asset items
+  - Relative `assets` and `image` paths resolve against `--article` (default: parent of `--notes`)
 
 ## Reference talks
 
@@ -78,12 +82,6 @@ uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests
 - Gitignored: `video.mp4`, `deck.pptx`, `deck.pdf`. Restore on a fresh clone with `scripts/restore-testdata.sh [source-dir]` (copies from `~/Downloads` by original file name)
 - Committed ground truth: `slides/NN.png` (100 dpi, 1000x563, PNG8, from the PDF, final state of animated slides), `slides.md` (pptx-to-markdown text and speaker notes, `# Slide N` per slide; image links and alt text dropped, the PNGs carry the images), `talk.json` (title, speaker, event, date, duration, slide count, animated slides). Date is month precision for askui and year only for EclipseCon (not in the decks)
 - `slides.md` keeps the social-handle footer of each slide (e.g. `@chrissbaumann #EclipseCon`); unspoken-content checks must ignore it
-
-Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`); tests: `uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scripts/tests`.
-
-- `review.py --notes <slides dir> --info <info.json> --out <dir> [--article <dir>] [--timeout S] [--no-open]`: serves the review page on a free localhost port, writes `<dir>/answers.json` on submit and exits 0; exits 1 on timeout, no file. Prints `Review page: <url>`; the orchestrator opens it for the user and waits for exit, then reads `answers.json` (`{"info": {...}, "items": {"<slide>/<asset>": {"status": "ok"|"fix", "comment": ""}}}`)
-  - `info.json`: object with keys `title`, `event`, `date`, `source`, `duration`, `speaker`; missing, null or empty = gap, shown highlighted
-  - `assets` and relative `image` paths in the notes resolve against `--article` (default: parent of `--notes`); `.drawio` entries are not shown, `.svg/.png` as image, `.tex` typeset by KaTeX from a CDN (offline: LaTeX source), `.md` as table, other files as code
 
 ## Conventions
 

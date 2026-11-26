@@ -15,17 +15,20 @@ review.py --notes <slides dir> --info <info.json> --out <dir>
 --article  base for relative `assets` and `image` paths in the notes
            (default: parent of --notes)
 
-The page shows the info fields, then every re-created item (each entry of
-`assets`, .drawio sources excluded) next to its original slide image, with
-ok / fix and a comment. Submitting writes <out>/answers.json and the script
+The page shows the info fields, then every re-created item next to its
+original slide image, with ok / fix and a comment. Items: each image in
+`assets` (.drawio sources excluded) and, from the note body, each fenced
+code block, Markdown table and $$...$$ formula (keys <slide>/code-N,
+table-N, formula-N). When the body has a formula, the slide's asset images
+are shown with the first formula instead of as own items. Submitting writes <out>/answers.json and the script
 exits 0:
 
   {"info": {field: value|null},
    "items": {"<slide>/<asset>": {"status": "ok"|"fix", "comment": "..."}}}
 
 Without a submission within --timeout the script exits 1 and writes nothing.
-LaTeX (.tex assets) is typeset by KaTeX loaded from a CDN; offline, the
-LaTeX source is shown as text.
+Formulas are typeset by KaTeX loaded from a CDN; offline, the LaTeX source
+is shown as text.
 """
 import argparse
 import html
@@ -43,7 +46,6 @@ import yaml
 INFO_FIELDS = ["title", "event", "date", "source", "duration", "speaker"]
 DEFAULT_TIMEOUT_S = 1800
 STATUSES = ("ok", "fix")
-IMAGE_SUFFIXES = {".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
 SOURCE_ONLY_SUFFIXES = {".drawio"}
 KATEX = "https://cdn.jsdelivr.net/npm/katex@0.16.11/dist"
 FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n?(.*)\Z", re.S)
@@ -58,23 +60,46 @@ def parse_note(path: Path) -> dict:
     return meta
 
 
+FENCE = re.compile(r"^```[^\n]*\n(.*?)^```[ \t]*$", re.S | re.M)
+DISPLAY_FORMULA = re.compile(r"\$\$(.+?)\$\$", re.S)
+TABLE = re.compile(r"(?:^[ \t]*\|.*(?:\n|\Z))+", re.M)
+
+
+def body_items(body: str) -> list[tuple[str, str]]:
+    """(type, text) for each display formula, table and code block."""
+    prose = FENCE.sub("", body)
+    formulas = [("formula", m.group(1).strip()) for m in DISPLAY_FORMULA.finditer(prose)]
+    tables = [("table", m.group(0).strip()) for m in TABLE.finditer(prose)]
+    code = [("code", m.group(1).rstrip("\n")) for m in FENCE.finditer(body)]
+    return formulas + tables + code
+
+
 def list_items(notes_dir: Path, article_dir: Path) -> list[dict]:
-    """One item per re-created asset, with the slide's original image."""
+    """One item per re-created diagram asset and per code block, table or
+    formula in the note body, each with the slide's original image."""
     items = []
     for note in sorted(notes_dir.glob("*.md")):
         meta = parse_note(note)
+        slide = meta["slide"]
+        common = {"slide": slide, "time": meta.get("time", ""),
+                  "kind": meta.get("kind", ""),
+                  "original": resolve(meta.get("image"), article_dir)}
+        from_body = body_items(meta["body"])
         assets = [a for a in meta.get("assets") or []
                   if Path(a).suffix.lower() not in SOURCE_ONLY_SUFFIXES]
-        for asset in assets:
-            items.append({
-                "key": f"{meta['slide']}/{asset}",
-                "slide": meta["slide"],
-                "time": meta.get("time", ""),
-                "kind": meta.get("kind", ""),
-                "asset": asset,
-                "asset_path": article_dir / asset,
-                "original": resolve(meta.get("image"), article_dir),
-            })
+        has_formula = any(kind == "formula" for kind, _ in from_body)
+        if not has_formula:
+            items += [{**common, "key": f"{slide}/{a}", "type": "asset",
+                       "label": a, "images": [article_dir / a], "text": ""}
+                      for a in assets]
+        counts: dict[str, int] = {}
+        for kind, text in from_body:
+            counts[kind] = counts.get(kind, 0) + 1
+            first_formula = kind == "formula" and counts[kind] == 1
+            items.append({**common, "key": f"{slide}/{kind}-{counts[kind]}",
+                          "type": kind, "label": f"{kind} {counts[kind]}",
+                          "images": [article_dir / a for a in assets] if first_formula else [],
+                          "text": text})
     return items
 
 
@@ -99,17 +124,15 @@ def table_html(markdown: str) -> str:
 
 
 def asset_html(item: dict, file_url) -> str:
-    path, suffix = item["asset_path"], item["asset_path"].suffix.lower()
-    if suffix in IMAGE_SUFFIXES:
-        return f'<img src="{file_url(path)}" alt="{html.escape(item["asset"])}">'
-    if not path.exists():
-        return '<p class="missing">asset file not found</p>'
-    text = path.read_text(encoding="utf-8")
-    if suffix == ".tex":
-        return f'<div class="latex">$${html.escape(text.strip())}$$</div>'
-    if suffix == ".md":
-        return table_html(text)
-    return f"<pre><code>{html.escape(text)}</code></pre>"
+    images = "".join(f'<img src="{file_url(p)}" alt="{html.escape(p.name)}">'
+                     for p in item["images"])
+    if item["type"] == "formula":
+        return f'<div class="latex">$${html.escape(item["text"])}$$</div>{images}'
+    if item["type"] == "table":
+        return table_html(item["text"])
+    if item["type"] == "code":
+        return f"<pre><code>{html.escape(item['text'])}</code></pre>"
+    return images
 
 
 def info_html(info: dict) -> str:
@@ -130,7 +153,7 @@ def item_html(index: int, item: dict, file_url) -> str:
                 if item["original"] else '<p class="missing">no original</p>')
     key = html.escape(item["key"], quote=True)
     return f"""<section class="item" data-key="{key}">
-<h3>Slide {item["slide"]} ({html.escape(str(item["time"]))}, {html.escape(item["kind"])}): {html.escape(item["asset"])}</h3>
+<h3>Slide {item["slide"]} ({html.escape(str(item["time"]))}, {html.escape(item["kind"])}): {html.escape(item["label"])}</h3>
 <div class="pair"><figure><figcaption>Original</figcaption>{original}</figure>
 <figure><figcaption>Re-created</figcaption>{asset_html(item, file_url)}</figure></div>
 <label><input type="radio" name="status.{index}" value="ok" checked> ok</label>

@@ -32,26 +32,40 @@ def test_parse_note_reads_frontmatter_and_body():
     assert meta["body"] == "Gateway box"
 
 
-def test_list_items_skips_slides_without_assets_and_drawio_sources(items):
+def test_list_items_come_from_assets_and_note_body(items):
     assert [i["key"] for i in items] == [
         "7/diagrams/0007-architecture.svg",
-        "9/formulas/0009-energy.tex",
-        "11/tables/0011-latency.md",
-        "12/code/0012-f.py",
+        "12/code-1",
+        "30/formula-1",
+        "30/table-1",
+        "30/code-1",
     ]
     assert items[0]["original"] == FIXTURE / "slices" / "0007_00-12-34.png"
 
 
+def test_formula_png_is_shown_with_the_formula_not_as_own_item(items):
+    formula = items[2]
+    assert formula["images"] == [FIXTURE / "diagrams" / "0030-throughput.png"]
+    assert "30/diagrams/0030-throughput.png" not in [i["key"] for i in items]
+
+
+def test_code_dollars_do_not_become_formulas(items):
+    assert "12/formula-1" not in [i["key"] for i in items]
+    assert "costs $5 and $6" in items[1]["text"]
+
+
 def test_page_shows_original_next_to_each_recreated_item(items, info):
     page = review.render_page(info, items, lambda p: f"/f/{p.name}")
-    assert page.count('class="item"') == 4
+    assert page.count('class="item"') == 5
     for item in items:
         block = page.split(f'data-key="{item["key"]}"')[1].split("</section>")[0]
         assert block.index("Original") < block.index("Re-created")
         assert f'/f/{item["original"].name}' in block
     assert "/f/0007-architecture.svg" in page
-    assert "$$E = mc^2$$" in page
-    assert "<td>12 ms</td>" in page
+    formula = page.split('data-key="30/formula-1"')[1].split("</section>")[0]
+    assert "$$\\mathrm{Throughput}" in formula
+    assert "/f/0030-throughput.png" in formula
+    assert "<td>8000</td>" in page
     assert "&lt;ok&gt;" in page
 
 
@@ -92,7 +106,7 @@ def test_post_writes_answers_in_documented_format(items, info, tmp_path):
     server, done, url = start(items, info, tmp_path)
     answers = {"info": {"title": "Talk", "event": None},
                "items": {i["key"]: {"status": "ok", "comment": ""} for i in items}}
-    answers["items"]["9/formulas/0009-energy.tex"] = {"status": "fix", "comment": "c"}
+    answers["items"]["30/formula-1"] = {"status": "fix", "comment": "c"}
     try:
         assert post(url, answers).read() == b"saved"
     finally:
