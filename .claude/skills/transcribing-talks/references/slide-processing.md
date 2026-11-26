@@ -12,12 +12,12 @@ Needs `magick` (ImageMagick 7), `tesseract`, `drawio`, `mmdc` (only when a diagr
 | `EXCERPT` | Text file with the transcript of the time range in which this slide is shown. |
 | `OUT` | Article folder (`<video>-article/`). Write only below it. |
 | `NOTES` | Folder for slide notes (work files). The note goes to `$NOTES/NNNN.md`. |
-| `LOG` | Your own log fragment `$WORK/imagemagick/NNNN.log` (the orchestrator merges the fragments). Create its folder if missing. |
+| `LOG` | Absolute path of your own log fragment `<WORK>/imagemagick/NNNN.log` (the orchestrator merges the fragments). |
 | `OVERLAY` | Speaker or webcam inset on most slides, as `WxH+X+Y` in the pixels of `SLIDE`, or `none`. |
 
 `NNNN` (slide number) and `HH-MM-SS` come from the slide file name. In the note, `slide` is the number as an integer and `time` is `"HH:MM:SS"`.
 
-Create `OUT` and `NOTES` (`mkdir -p`) if missing. Take `md5 -r "$SLIDE"` now; step 8 compares against it. Commands run in zsh: do not store a command in a variable and expand it, write it out.
+Create `OUT`, `NOTES` and `$(dirname "$LOG")` (`mkdir -p`) if missing. Take `md5 -r "$SLIDE"` now; step 8 compares against it. Commands run in zsh: do not store a command in a variable and expand it, write it out.
 
 Done when: `SLIDE` and `EXCERPT` exist, `OUT` and `NOTES` exist and are writable, the md5 is noted.
 

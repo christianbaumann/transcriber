@@ -83,10 +83,10 @@ One subagent per slide, at most `MAX_PARALLEL` at once. Brief:
 
 Collect the replies. A slide whose reply lists a failed check or an unreadable item: note it; do not rerun unless the note is missing.
 
-Then merge the log fragments in slide order (zsh; `(N)` makes an empty match legal, so this also works when no slide needed an edit):
+Then merge the log fragments in slide order (works in bash and zsh, also when no slide needed an edit: the log is then empty):
 
 ```bash
-for f in "$WORK"/imagemagick/*.log(N); do cat "$f"; done > "$OUT/imagemagick.log"
+find "$WORK/imagemagick" -name '*.log' 2>/dev/null | sort | while read -r f; do cat "$f"; done > "$OUT/imagemagick.log"
 ```
 
 Done when `$WORK/slides/NNNN.md` exists for every slide in `$SLICES` and `$OUT/imagemagick.log` holds the merged fragments.
@@ -156,9 +156,10 @@ Done when `answers.json` exists.
 1. Info: write `answers.info` to `$WORK/info.json` (keys with `null` stay `null`). If it differs from before, rewrite the article's info area at the top of `article.md` (the `# title` line and the bullet list below it, as the edit brief's step 2.1 defines it, labels in `LANGUAGE`, empty values omitted). Change nothing else there.
 2. Fixes: for every slide with at least one item of status `fix`, one subagent, run one after another (they all edit `article.md`). Brief:
 
-   > Read `<REFS>/slide-processing.md`. Redo only the listed items of one slide. `SLIDE` = `<abs>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` as in step 5, `LOG` = `<WORK>/imagemagick/NNNN.log` (after the redo, replace this slide's lines in `<OUT>/imagemagick.log` with the fragment's). The slide note is `<WORK>/slides/NNNN.md`. Items to fix, each with the user's comment: `<key>: <comment>` ... Apply each comment to the item (step 4 for the re-creation, step 7 and 8 for the note and checks); keep the same file names and leave all other content of the slide as it is. Then edit `<OUT>/article.md` so that the same item (code block, table, formula, diagram image) and every sentence of the article that describes or names it matches the corrected note (search the article for the changed text); change nothing else in the article. Reply with what you changed in the note, the assets and the article.
+   > Read `<REFS>/slide-processing.md`. Redo only the listed items of one slide. `SLIDE` = `<abs>`, `EXCERPT` = `<WORK>/slide-excerpts/NNNN.txt`, `OUT` = `<OUT>`, `NOTES` = `<WORK>/slides`, `OVERLAY` as in step 5, `LOG` = `<WORK>/imagemagick/NNNN.log`. The slide note is `<WORK>/slides/NNNN.md`. Items to fix, each with the user's comment: `<key>: <comment>` ... Apply each comment to the item (step 4 for the re-creation, step 7 and 8 for the note and checks); keep the same file names and leave all other content of the slide as it is. Then edit `<OUT>/article.md` so that the same item (code block, table, formula, diagram image) and every sentence of the article that describes or names it matches the corrected note (search the article for the changed text); change nothing else in the article. Reply with what you changed in the note, the assets and the article.
 
-3. Check one fix: the changed item in `article.md` matches the changed note.
+3. Run the step 5 log merge again so `imagemagick.log` has the redone commands.
+4. Check one fix: the changed item in `article.md` matches the changed note.
 
 Done when `info.json` and the article's info area agree, and every `fix` comment has been applied in the note and in `article.md`.
 
