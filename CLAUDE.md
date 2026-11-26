@@ -79,6 +79,12 @@ uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests
 - Committed ground truth: `slides/NN.png` (100 dpi, 1000x563, PNG8, from the PDF, final state of animated slides), `slides.md` (pptx-to-markdown text and speaker notes, `# Slide N` per slide; image links and alt text dropped, the PNGs carry the images), `talk.json` (title, speaker, event, date, duration, slide count, animated slides). Date is month precision for askui and year only for EclipseCon (not in the decks)
 - `slides.md` keeps the social-handle footer of each slide (e.g. `@chrissbaumann #EclipseCon`); unspoken-content checks must ignore it
 
+Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`); tests: `uv run --with pytest --with pyyaml pytest .claude/skills/transcribing-talks/scripts/tests`.
+
+- `review.py --notes <slides dir> --info <info.json> --out <dir> [--article <dir>] [--timeout S] [--no-open]`: serves the review page on a free localhost port, writes `<dir>/answers.json` on submit and exits 0; exits 1 on timeout, no file. Prints `Review page: <url>`; the orchestrator opens it for the user and waits for exit, then reads `answers.json` (`{"info": {...}, "items": {"<slide>/<asset>": {"status": "ok"|"fix", "comment": ""}}}`)
+  - `info.json`: object with keys `title`, `event`, `date`, `source`, `duration`, `speaker`; missing, null or empty = gap, shown highlighted
+  - `assets` and relative `image` paths in the notes resolve against `--article` (default: parent of `--notes`); `.drawio` entries are not shown, `.svg/.png` as image, `.tex` typeset by KaTeX from a CDN (offline: LaTeX source), `.md` as table, other files as code
+
 ## Conventions
 
 - Trunk is `main` (no `development` branch in this repo)
