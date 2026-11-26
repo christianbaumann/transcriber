@@ -22,6 +22,10 @@ Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; no c
 - A skill is a directory with a `SKILL.md` (YAML frontmatter: `name`, `description`; body: instructions) plus optional `scripts/` and `references/`
 - Deterministic, mechanical steps (audio extraction, transcription) belong in scripts; judgment steps (chapter boundaries, prose rewriting, choosing which images matter) stay in `SKILL.md` instructions for the model
 
+## Skills
+
+- `.claude/skills/downloading-youtube-video/`: vendored from music-transcriber (commit named in the provenance comment); only change is `--write-info-json`, so the download yields `out/youtube/<Title>-[<id>].info.json` (`title`, `uploader`, `upload_date`, `webpage_url`, `duration`, `description`) next to the video
+
 ## Decisions
 
 User-visible behavior (output layout and formats, article language, info area, review pass, when screenshots are shown) is in [README.md](README.md). Implementation details:

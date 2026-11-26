@@ -1,5 +1,6 @@
 ---
 id: 02
+status: done
 dependencies: []
 ---
 
@@ -20,15 +21,19 @@ Given one YouTube video URL, the skill downloads the highest-resolution file and
 
 ## Work
 
-* [ ] Copy the skill from music-transcriber with a provenance comment (source repo path, commit)
-* [ ] Add `--write-info-json` to the yt-dlp command; report both paths (video and `.info.json`)
-* [ ] Keep the URL check, retry and DRM rules unchanged
-* [ ] Add `out/` to `.gitignore`
-* [ ] Mention the skill in `CLAUDE.md`
+* [x] Copy the skill from music-transcriber with a provenance comment (source repo path, commit)
+* [x] Add `--write-info-json` to the yt-dlp command; report both paths (video and `.info.json`)
+* [x] Keep the URL check, retry and DRM rules unchanged
+* [x] Add `out/` to `.gitignore`
+* [x] Mention the skill in `CLAUDE.md`
 
 ## Verification
 
-* [ ] A single-video URL produces `out/youtube/<Title>-[<id>].mp4` (or `.mkv`) and `<Title>-[<id>].info.json`
-* [ ] The JSON holds `title`, `uploader`, `upload_date`, `webpage_url`, `duration`
-* [ ] A playlist URL without a video ID stops with a request for a single video URL
-* [ ] `git status` does not show files under `out/`
+* [x] A single-video URL produces `out/youtube/<Title>-[<id>].mp4` (or `.mkv`) and `<Title>-[<id>].info.json`
+  **Note:** Verified via a real run of the skill command on `jNQXAC9IVRw`: `Me_at_the_zoo-[jNQXAC9IVRw].mkv` and `.info.json` written; printed path is the `.mkv`.
+* [x] The JSON holds `title`, `uploader`, `upload_date`, `webpage_url`, `duration`
+  **Note:** Verified via parsing the info.json: all five keys present, plus `description`.
+* [x] A playlist URL without a video ID stops with a request for a single video URL
+  **Note:** Verified by following step 1 for a `playlist?list=` URL: no video ID, so the skill stops before yt-dlp. Raw yt-dlp with `--no-playlist` would still walk such a playlist, so step 1 is the only guard.
+* [x] `git status` does not show files under `out/`
+  **Note:** Verified via `git check-ignore` (`.gitignore:1:out/`) and a clean `git status` with files present under `out/youtube/`.
