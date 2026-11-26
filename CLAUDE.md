@@ -2,13 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Documentation
-
-- [README.md](README.md) is for humans: purpose, status, what the skill does, output, requirements. Read it first; this file does not repeat it
-- CLAUDE.md holds only what an agent needs on top: implementation details, conventions, internal paths
-- Information relevant to humans goes into README.md and is referenced from here, never duplicated
-- Update both files with every commit as necessary
-
 ## Status
 
 Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; no code yet. Update this file once structure, commands and tests exist.
