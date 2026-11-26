@@ -33,7 +33,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **video-slicer:** vendored into `.claude/skills/video-slicer/` with a provenance comment naming the source commit; runs as a subagent
 - **YouTube download:** vendored copy of music-transcriber's `downloading-youtube-video` skill; runs as a subagent; needs `--write-info-json` added for the info area
 - **Transcription:** `mlx_whisper` with model large-v3, word-level timestamps (used to align slides with text)
-- **HTML:** built with `pandoc`, KaTeX for formulas
+- **HTML:** built with `pandoc`, KaTeX for formulas; `build_html.py` uses `--embed-resources --math-method=katex`, which fetches KaTeX (JS, CSS, fonts) from pandoc's default CDN at build time and inlines it (~1.7 MB), so the build needs network but the output renders offline
 - **Diagrams:** `.drawio` kept next to its exported SVG; decide per diagram whether another format (e.g. Mermaid) works better
 - **Formulas:** LaTeX (`$…$`/`$$…$$`) and a rendered image
 - **Slide reading:** Claude reads each slide image; `tesseract` OCR as cross-check for small text
@@ -49,6 +49,11 @@ User-visible behavior (output layout and formats, article language, info area, r
   uv run --with pytest pytest -o pythonpath=.claude/skills/video-slicer/scripts .claude/skills/video-slicer/tests
   ```
   The tests live under the vendored skill (not a root `tests/`) so they do not clash with later skill tests; the `-o pythonpath` replaces the source repo's `pyproject.toml` setting. Two path constants in `test_detect.py` and `test_score_pipeline.py` differ from upstream for that layout.
+- HTML build (needs `pandoc`, network for KaTeX; tests skip without pandoc), from the repo root:
+  ```bash
+  .claude/skills/transcribing-talks/scripts/build_html.py article.md --out article.html
+  uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests/test_build_html.py
+  ```
 
 Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`):
 
