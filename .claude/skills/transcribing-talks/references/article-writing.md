@@ -157,7 +157,7 @@ Report in at most 8 lines: chapter number, subchapter count, lists and quotes wr
 
 ## Edit brief
 
-Inputs: `OUTLINE`, `CHAPTERS` (folder with `NN.md`), `INFO` (JSON with the confirmed info-area values), `OUT`, `LANGUAGE`, `ARTICLE` (`$OUT/article.md`, to write).
+Inputs: `OUTLINE`, `CHAPTERS` (folder with `NN.md`), `NOTES`, `INFO` (JSON with the confirmed info-area values), `OUT`, `LANGUAGE`, `ARTICLE` (`$OUT/article.md`, to write).
 
 `INFO` keys: `title`, `event`, `date`, `speaker`, `source`, `duration`. A key may be missing or empty.
 
@@ -190,7 +190,7 @@ Fix what fails:
 2. Every image path exists below `OUT`; no path points to a slice folder or `reference/`; no image appears twice.
 3. No paragraph appears twice (check with a short script comparing normalized paragraphs, and sentences of 8 or more words across chapters).
 4. Every link target exists.
-4a. Image check: list every image in the article with its note's `kind`, `show_screenshot`, and whether the chapter text refers to it. Remove an image that is a photo (`kind: photo`) the text does not refer to.
+4a. Image check: list every image in the article with its note's `kind` (`NOTES/NNNN.md`) and whether the surrounding text refers to it. Remove an image that is a photo (`kind: photo`) the text does not refer to.
 5. The words of `INFO` values appear in the info area, and no other value is invented.
 6. You created no files except `ARTICLE` and temp files, which you delete.
 

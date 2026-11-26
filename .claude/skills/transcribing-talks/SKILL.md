@@ -133,7 +133,7 @@ Done when `chapters/NN.md` exists for every chapter of the outline.
 
 One subagent. Brief:
 
-> Read `<REFS>/article-writing.md`, section "Edit brief", and follow it. `OUTLINE` = `<WORK>/outline.md`, `CHAPTERS` = `<WORK>/chapters`, `INFO` = `<WORK>/info.json`, `OUT` = `<OUT>`, `LANGUAGE` = `<language>`, `ARTICLE` = `<OUT>/article.md`.
+> Read `<REFS>/article-writing.md`, section "Edit brief", and follow it. `OUTLINE` = `<WORK>/outline.md`, `CHAPTERS` = `<WORK>/chapters`, `NOTES` = `<WORK>/slides`, `INFO` = `<WORK>/info.json`, `OUT` = `<OUT>`, `LANGUAGE` = `<language>`, `ARTICLE` = `<OUT>/article.md`.
 
 `INFO` is the same `info.json` that step 10 shows and updates.
 
