@@ -35,7 +35,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **video-slicer:** vendored into `.claude/skills/video-slicer/` with a provenance comment naming the source commit; runs as a subagent
 - **YouTube download:** vendored copy of music-transcriber's `downloading-youtube-video` skill; runs as a subagent; needs `--write-info-json` added for the info area
 - **Transcription:** `mlx_whisper` with model large-v3, word-level timestamps (used to align slides with text)
-- **HTML:** built with `pandoc`, KaTeX for formulas; `build_html.py` uses `--embed-resources --math-method=katex`, which fetches KaTeX (JS, CSS, fonts) from pandoc's default CDN at build time and inlines it (~1.7 MB), so the build needs network but the output renders offline
+- **HTML:** built with `pandoc`, KaTeX for formulas; `build_html.py` uses `--embed-resources --math-method=katex`, which fetches KaTeX (JS, CSS, fonts) from pandoc's default CDN at build time and inlines it (~1.7 MB), so the build needs network but the output renders offline; reads `markdown+gfm_auto_identifiers` so heading ids are GitHub-style (`#43-too-many-arguments`, matching article.md links) and fails on any internal link without a matching id
 - **Diagrams:** `.drawio` kept next to its exported SVG; decide per diagram whether another format (e.g. Mermaid) works better
 - **Formulas:** LaTeX (`$…$`/`$$…$$`) in the slide note and the article (KaTeX); the rendered image is only for the review page, `review.py` shows it, the article does not embed it
 - **Slide reading:** Claude reads each slide image; `tesseract` OCR as cross-check for small text
@@ -56,7 +56,7 @@ User-visible behavior (output layout and formats, article language, info area, r
   uv run --with pytest pytest -o pythonpath=.claude/skills/video-slicer/scripts .claude/skills/video-slicer/tests
   ```
   The tests live under the vendored skill (not a root `tests/`) so they do not clash with later skill tests; the `-o pythonpath` replaces the source repo's `pyproject.toml` setting. Two path constants in `test_detect.py` and `test_score_pipeline.py` differ from upstream for that layout.
-- HTML build (needs `pandoc` and network for KaTeX, also for its tests; tests skip without pandoc), from the repo root:
+- HTML build (needs `pandoc` and network for KaTeX, also for its tests; tests skip without pandoc; reads `markdown+gfm_auto_identifiers` and fails on internal links without a matching id), from the repo root:
   ```bash
   .claude/skills/transcribing-talks/scripts/build_html.py article.md --out article.html
   uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests/test_build_html.py
