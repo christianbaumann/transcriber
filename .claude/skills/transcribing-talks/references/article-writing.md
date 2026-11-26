@@ -72,7 +72,26 @@ Rules:
 - A subchapter needs at least a few sentences of content; fold anything shorter (under about 30 seconds) into its neighbour. A chapter with one topic has no subchapters.
 - Write nothing else: no prose, no comments.
 
-Done when: the file has the front matter, all sections in time order, ranges that tile the talk, and every `slides` range matches the markers of `TRANSCRIPT` (check with a short script: markers inside each range fall inside its slide range).
+Done when: the file has the front matter, all sections in time order, ranges that tile the talk, and the check below prints `ok`. It fails when a slide marker inside a section's time range lies outside the section's `slides` range, or when the last `Not in article` range does not end with `end`. Save it to a temp file and run `python3 <file> "$OUTLINE" "$TRANSCRIPT"`; fix the outline and rerun until it passes.
+
+```python
+import re, sys
+outline, transcript = open(sys.argv[1]).read(), open(sys.argv[2]).read()
+sec = lambda t: sum(int(x) * m for x, m in zip(t.split(":"), (3600, 60, 1)))
+paras = [(sec(m[1]), [int(n) for n in re.findall(r"slide (\d+)", m[2])])
+         for m in re.finditer(r"^\[(\d\d:\d\d:\d\d)\] (.*)$", transcript, re.M) for m in [(0, m[1], m[2])]]
+bad = []
+for h, a, b, first, last in re.findall(r"^(#+ .*?) \[(\d\d:\d\d:\d\d)-(\d\d:\d\d:\d\d)\] slides? (\d+|-)(?:-(\d+))?$", outline, re.M):
+    shown = sorted({n for t, ns in paras if sec(a) <= t < sec(b) for n in ns})
+    lo, hi = (int(first), int(last or first)) if first != "-" else (1, 0)
+    bad += [f"{h}: slide {n} appears in range but is outside slides {first}-{last or first}" for n in shown if not lo <= n <= hi]
+for m in re.finditer(r"^Not in article: \[(\S+?)-(\S+?)\]", outline, re.M):
+    if not (m[2] == "end" or re.fullmatch(r"\d\d:\d\d:\d\d", m[2])): bad.append(f"bad end: {m[0]}")
+last = re.findall(r"^Not in article: \[\S+?-(\S+?)\]", outline, re.M)
+if last and re.fullmatch(r"\d\d:\d\d:\d\d", last[-1]) and sec(last[-1]) >= paras[-1][0]: bad.append("last range must end with 'end'")
+print("\n".join(bad) or "ok")
+sys.exit(bool(bad))
+```
 
 Report in at most 6 lines: chapter count, whether the frame came from slides or from the transcript, doubtful boundaries.
 
@@ -103,7 +122,7 @@ Write `CHAPTER_FILE`. Content, in this order of priority: what the speaker says,
   - table: copy the Markdown table
   - a re-created diagram is placed where its slide appears, also when `show_screenshot` is `false`, unless the speaker does not use it
   - diagram: `![caption](diagrams/NNNN-name.svg)` using the `.svg` (or `.png`) in `assets`, never the `.drawio` or `.mmd` source; add one or two sentences saying what it shows, from the note's description, so the text works without the picture
-- Images: a note with `show_screenshot: true` has `edited_image`. Show it as `![caption](images/NNNN.png)` only when it earns its place: the speaker refers to it ("the guy on the right", "this comic"), it is a tool or UI screenshot, or it illustrates a concrete example. Put it after the paragraph where the slide appears. `show_screenshot: true` only means the image is available: a decorative photo the speaker never refers to, and any picture the text does not need, is omitted. For a run of slides with the same picture, show it at most once, and only when the rule above applies. The caption is one factual line from the note's `[Image: ...]` text. With `show_screenshot: false` show nothing, whatever the kind.
+- Images: a note with `show_screenshot: true` has `edited_image`. Show it as `![caption](images/NNNN.png)` only when it earns its place: the speaker refers to it ("the guy on the right", "this comic"), it is a tool or UI screenshot, or it illustrates a concrete example. Put it after the paragraph where the slide appears. For a run of slides with the same picture, use the slide where the speaker refers to it, otherwise the first slide of the run. `show_screenshot: true` only means the image is available: a decorative photo the speaker never refers to, and any picture the text does not need, is omitted. A run of slides with the same picture shows it at most once. The caption is one factual line from the note's `[Image: ...]` text. With `show_screenshot: false` show nothing, whatever the kind.
 - Paths: relative to `OUT` (`images/...`, `diagrams/...`), exactly as in the note. Never the slice path, `reference/` or an absolute path.
 - Unspoken content: every `unspoken` item of every note in the range appears in the chapter in its natural place, as prose, list item or table, in the chapter's language. A title that names an organization in full: give the full name at first mention ("the CSSF (Commission de Surveillance du Secteur Financier)"). Do not mark it as coming from a slide.
 - Do not repeat what a neighbour chapter covers. When a point depends on one, refer to it in a clause ("see chapter 3") instead of explaining again; the edit pass checks the references.
@@ -118,7 +137,19 @@ Fix what fails:
 1. Every image path in `CHAPTER_FILE` exists below `OUT` (`test -f`).
 2. Every `unspoken` item of the range is found in the text (search by its key words).
 3. No `#` heading, headings match the outline's numbering, subchapters in order.
-4. No sentence of 8 or more words is copied from `EXCERPT` unchanged except quotes (check with a short script).
+4. No run of 8 or more words is copied from `EXCERPT` unchanged except in quotes. Save the script below to a temp file and run `python3 <file> "$EXCERPT" "$CHAPTER_FILE"`. Reword every hit, except a hit that is a title, a name or the wording of a slide list item.
+
+```python
+import re, sys
+words = lambda t: re.sub(r"[^\w']+", " ", t.lower()).split()
+src = words(open(sys.argv[1]).read())
+seen = {tuple(src[i:i + 8]) for i in range(len(src) - 7)}
+text = " ".join(l for l in open(sys.argv[2]) if not l.startswith(">"))
+w = words(text)
+hits = sorted({" ".join(w[i:i + 8]) for i in range(len(w) - 7) if tuple(w[i:i + 8]) in seen})
+print("\n".join(hits) or "ok")
+sys.exit(bool(hits))
+```
 5. You created no other files except temp files, which you delete.
 
 Report in at most 8 lines: chapter number, subchapter count, lists and quotes written, images placed and omitted (slide numbers), unspoken items placed, outline titles changed, anything in the transcript you could not make sense of.
