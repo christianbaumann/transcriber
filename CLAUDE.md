@@ -49,7 +49,7 @@ User-visible behavior (output layout and formats, article language, info area, r
   uv run --with pytest pytest -o pythonpath=.claude/skills/video-slicer/scripts .claude/skills/video-slicer/tests
   ```
   The tests live under the vendored skill (not a root `tests/`) so they do not clash with later skill tests; the `-o pythonpath` replaces the source repo's `pyproject.toml` setting. Two path constants in `test_detect.py` and `test_score_pipeline.py` differ from upstream for that layout.
-- HTML build (needs `pandoc`, network for KaTeX; tests skip without pandoc), from the repo root:
+- HTML build (needs `pandoc` and network for KaTeX, also for its tests; tests skip without pandoc), from the repo root:
   ```bash
   .claude/skills/transcribing-talks/scripts/build_html.py article.md --out article.html
   uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests/test_build_html.py

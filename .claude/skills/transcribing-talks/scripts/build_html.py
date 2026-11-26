@@ -16,19 +16,11 @@ import sys
 from pathlib import Path
 
 CSS = Path(__file__).with_name("article.css")
-IMAGE_REF = re.compile(r'!\[[^\]]*\]\(\s*<?([^)\s>]+)|<img[^>]+src="([^"]+)"')
-REMOTE_REF = re.compile(r"^(?:[a-z][a-z0-9+.-]*:|#)", re.I)
 PANDOC_RESOURCE_WARNING = "Could not fetch resource"
 
 
 class BuildError(Exception):
     pass
-
-
-def missing_images(markdown: str, base: Path) -> list[Path]:
-    refs = [a or b for a, b in IMAGE_REF.findall(markdown)]
-    paths = [base / ref for ref in refs if not REMOTE_REF.match(ref)]
-    return [p for p in paths if not p.is_file()]
 
 
 def page_title(markdown: str, fallback: str) -> str:
@@ -43,9 +35,6 @@ def build(article: Path, out: Path) -> None:
     if not article.is_file():
         raise BuildError(f"article not found: {article}")
     markdown = article.read_text(encoding="utf-8")
-    missing = missing_images(markdown, article.parent)
-    if missing:
-        raise BuildError("image not found: " + ", ".join(str(p) for p in missing))
     cmd = [
         pandoc, str(article), "--from=markdown", "--standalone", "--embed-resources",
         "--math-method=katex", f"--css={CSS}", f"--resource-path={article.parent}",
@@ -53,7 +42,10 @@ def build(article: Path, out: Path) -> None:
         "--output", str(out),
     ]
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
-    if result.returncode != 0 or PANDOC_RESOURCE_WARNING in result.stderr:
+    unresolved = [line for line in result.stderr.splitlines() if PANDOC_RESOURCE_WARNING in line]
+    if unresolved:
+        raise BuildError("image not found: " + "; ".join(l.split(PANDOC_RESOURCE_WARNING)[1].strip() for l in unresolved))
+    if result.returncode != 0:
         raise BuildError(f"pandoc failed:\n{result.stderr.strip()}")
 
 

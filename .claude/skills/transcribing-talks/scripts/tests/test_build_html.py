@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 from html.parser import HTMLParser
 import sys
 from pathlib import Path
@@ -29,11 +30,6 @@ def html(tmp_path_factory) -> str:
     out = tmp_path_factory.mktemp("out") / "article.html"
     build_html.build(FIXTURE, out)
     return out.read_text(encoding="utf-8")
-
-
-def test_missing_images_names_path_and_ignores_remote(tmp_path):
-    md = "![a](gone.png) ![b](https://x.org/b.png) ![c](data:image/png;base64,AA)"
-    assert [p.name for p in build_html.missing_images(md, tmp_path)] == ["gone.png"]
 
 
 def test_page_title_uses_first_heading_else_fallback():
@@ -74,3 +70,33 @@ def test_missing_pandoc_reports_clearly(monkeypatch, tmp_path):
     monkeypatch.setattr(build_html.shutil, "which", lambda _: None)
     with pytest.raises(build_html.BuildError, match="pandoc not found"):
         build_html.build(FIXTURE, tmp_path / "a.html")
+
+
+SVG = (FIXTURE.parent / "images" / "diagram.svg").read_text()
+
+
+@needs_pandoc
+@pytest.mark.parametrize("ref,target", [
+    ("<my images/a b.png>", "my images/a b.png"),
+    ("my%20images/a%20b.png", "my images/a b.png"),
+    ("diagrams/x.svg", "diagrams/x.svg"),
+])
+def test_valid_image_refs_build(tmp_path, ref, target):
+    path = tmp_path / target
+    path.parent.mkdir(parents=True)
+    path.write_text(SVG) if target.endswith(".svg") else shutil.copy(
+        FIXTURE.parent / "images" / "slide.png", path)
+    article = tmp_path / "a.md"
+    article.write_text(f"![x]({ref})\n")
+    build_html.build(article, tmp_path / "a.html")
+
+
+@needs_pandoc
+def test_cli_missing_image_exits_1_naming_path(tmp_path):
+    article = tmp_path / "a.md"
+    article.write_text("![x](images/nope.png)\n")
+    script = Path(build_html.__file__)
+    result = subprocess.run([sys.executable, str(script), str(article), "--out", str(tmp_path / "a.html")],
+                            capture_output=True, text=True)
+    assert result.returncode == 1
+    assert "images/nope.png" in result.stderr
