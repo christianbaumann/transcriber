@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; implementation in progress (task `status` in `tasks/`).
+Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; the orchestrator `transcribing-talks/SKILL.md` runs the full pipeline (task `status` in `tasks/`).
 
 ## Dependencies on sibling projects
 
@@ -26,6 +26,8 @@ Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; impl
 
 - `.claude/skills/downloading-youtube-video/`: vendored from music-transcriber (commit named in the provenance comment); only change is `--write-info-json`, so the download yields `out/youtube/<Title>-[<id>].info.json` (`title`, `uploader`, `upload_date`, `webpage_url`, `duration`, `description`) next to the video
 
+- `.claude/skills/transcribing-talks/`: orchestrator. `SKILL.md` has the 12 steps with done criteria; `references/slicer-review.md` overrides the slicer's step 5; `references/slide-processing.md` and `references/article-writing.md` are the subagent briefs
+
 ## Decisions
 
 User-visible behavior (output layout and formats, article language, info area, review pass, when screenshots are shown) is in [README.md](README.md). Implementation details:
@@ -41,6 +43,9 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Article briefs:** `.claude/skills/transcribing-talks/references/article-writing.md` holds the outline, chapter and edit briefs; the orchestrator passes `TRANSCRIPT`, `NOTES`, `OUT`, `WORK`, `LANGUAGE` (plus `OUTLINE`, `EXCERPT`, `CHAPTER_FILE`, `INFO`, `ARTICLE` per brief) as absolute paths. `transcript.py --excerpt` has no slide markers, so chapter writers also read the range in `transcript.md`.
 - **Image editing:** article uses the edited images; originals stay in `<video>-slices/`; every ImageMagick command is logged
 - **Review pass:** after approval, the original screenshots of re-created items stay in a reference folder
+- **Concurrency:** `MAX_PARALLEL = 6` subagents at once (per-slide, per-chapter); fixes after the review run one after another because they edit `article.md`
+- **One `info.json`:** the orchestrator writes `$WORK/info.json` (keys as `review.py` expects) before the outline; it is the edit brief's `INFO` and the review page's `--info`. `answers.json` info values go back into `info.json` and the article's info area; `fix` items are redone by one subagent per slide, which also edits the article (the brief names the changed text so prose that quotes it is updated too)
+- **Review order:** per design the review page comes after the edit pass, so answers are applied to a finished `article.md`
 - **Info area / title:** fallback order for the title is title slide or speaker's introduction, then file or video name
 
 ## Commands
@@ -55,6 +60,8 @@ User-visible behavior (output layout and formats, article language, info area, r
   .claude/skills/transcribing-talks/scripts/build_html.py article.md --out article.html
   uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests/test_build_html.py
   ```
+
+- `pipeline.py` (needs `pyyaml`): `slide-excerpts <whisper.json> <slices> --out <dir>`, `chapter-excerpts <whisper.json> <outline.md> --out <dir>`, `reference <notes> <article>` (copies the originals of slides with review items to `<article>/reference/`)
 
 Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`):
 

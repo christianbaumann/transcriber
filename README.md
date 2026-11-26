@@ -4,10 +4,17 @@ A Claude Code skill (`transcribing-talks`) that turns a video recording of a tal
 
 ## Status
 
-In design. The design and the task breakdown are done; there is no code yet, so the skill cannot be used.
+Usable. Ask Claude Code to turn a talk video or a YouTube URL into an article; the skill `transcribing-talks` (`.claude/skills/transcribing-talks/SKILL.md`) runs the pipeline. Verified on a 22 min talk with 25 slides.
 
 - [Design](.agents/changes/2026-11-26-talk-to-article/design.md): pipeline, output layout, decisions
 - [Tasks](.agents/changes/2026-11-26-talk-to-article/tasks/): implementation slices and their dependencies
+
+## Usage
+
+Say, for example: "Turn `~/Videos/talk.mp4` into an article" or "Write an article from this talk: `<YouTube URL>`". The skill works in subagents (at most 6 at once), so a talk with 50 slides takes a while and many tokens. It asks you when:
+
+- the talk is in a language other than English or German (which article language?)
+- the review page is ready (info area and re-created items, see above)
 
 ## What it does
 
