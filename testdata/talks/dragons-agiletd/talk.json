@@ -1,0 +1,13 @@
+{
+  "title": "Dragons, biases, and other things you shouldn’t ignore",
+  "speaker": "Søren Wassard, Christian Baumann",
+  "event": "Agile Testing Days 2025",
+  "date": "2025",
+  "duration_seconds": 2577.88,
+  "slide_count": 33,
+  "animated_slides": [
+    4,
+    29
+  ],
+  "note": "Numbering follows the PDF (33 pages). The pptx has 41 slides: PDF pages 1-32 are pptx slides 1-32, PDF page 33 is pptx slide 34 (Thank you). pptx slide 33 (a repeat of the Wrap up slide 32) is not in the PDF and not in slides.md; pptx slides 35-41 (Inattentional Blindness) are hidden, absent from the PDF and never shown in the recording. Slide 29 links a video that does not play in the recording."
+}

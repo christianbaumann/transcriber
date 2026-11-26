@@ -42,6 +42,21 @@
         "Unspoken slide content reaches the article: coverage is at least 0.7",
         "The article has headings at least 2 levels below the title"
       ]
+    },
+    {
+      "id": 3,
+      "prompt": "Turn this conference talk recording into an article: testdata/talks/dragons-agiletd/video.mp4",
+      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "files": [
+        "../../../testdata/talks/dragons-agiletd/video.mp4"
+      ],
+      "ground_truth": "testdata/talks/dragons-agiletd",
+      "expectations": [
+        "All required files are present: article.md, article.html, transcript.md, whisper.json, imagemagick.log",
+        "Slide recall is at least 0.9",
+        "Unspoken slide content reaches the article: coverage is at least 0.7",
+        "The article has headings at least 2 levels below the title"
+      ]
     }
   ]
 }

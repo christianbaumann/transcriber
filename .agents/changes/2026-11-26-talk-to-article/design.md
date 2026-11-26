@@ -241,6 +241,7 @@ unspoken:
   | Don't be a fool with a tool (askui Hackathon 2023-03) | 46 min, 1280x720 | 55 slides, .pptx + .pdf |
   | Extreme learning situations as testers (EclipseCon 2020) | 22 min, 1920x1050 | 31 slides, .pptx + .pdf |
 
+  A third talk (AgileTD 2025, "Dragons") was added later: see [backlog-qa-dragons](../2026-11-26-backlog-qa-dragons/design.md).
   Ground truth: slide images from the PDFs, slide text and speaker notes from the .pptx (`pptx-to-markdown` skill). The decks match the recordings, so slides compare 1:1.
 - **Reason:** Slide recall and "unspoken content reaches the article" can be checked against a known source, as in video-slicer's own evaluation.
 - **Trade-offs:** Large files stay outside git; a fresh clone needs them copied from `~/Downloads`. Animations: the askui deck has entrance animations on 7 slides (20 effects, no exit effects). The PDF shows the final state, and the slicer keeps only the final state of a build, so they match; earlier build steps do not count as missed. Slides shown under 2 s are missed by the slicer by design.

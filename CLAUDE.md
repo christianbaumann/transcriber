@@ -91,9 +91,13 @@ uv run --with pytest --with pyyaml --with numpy --with pillow --with scipy pytes
 
 ## Reference talks
 
-- `testdata/talks/<name>/` for `fool-with-a-tool` (askui, 55 slides) and `extreme-learning-eclipsecon` (31 slides); design: `.agents/changes/2026-11-26-talk-to-article/design.md#reference-talks-for-evals`
+- `testdata/talks/<name>/` holds the reference talks:
+  - `fool-with-a-tool`: askui, 55 slides
+  - `extreme-learning-eclipsecon`: 31 slides
+  - `dragons-agiletd`: AgileTD 2025, 33 slides, two speakers in one `speaker` string; the pptx has 41 slides and the PDF 33, ground truth follows the PDF numbering, mapping in `talk.json`
+  - Design: `.agents/changes/2026-11-26-talk-to-article/design.md#reference-talks-for-evals` (first two), `.agents/changes/2026-11-26-backlog-qa-dragons/design.md` (Dragons)
 - Gitignored: `video.mp4`, `deck.pptx`, `deck.pdf`. Restore on a fresh clone with `scripts/restore-testdata.sh [source-dir]` (copies from `~/Downloads` by original file name)
-- Committed ground truth: `slides/NN.png` (100 dpi, 1000x563, PNG8, from the PDF, final state of animated slides), `slides.md` (pptx-to-markdown text and speaker notes, `# Slide N` per slide; image links and alt text dropped, the PNGs carry the images), `talk.json` (title, speaker, event, date, duration, slide count, animated slides). Date is month precision for askui and year only for EclipseCon (not in the decks)
+- Committed ground truth: `slides/NN.png` (100 dpi, 1000x563, PNG8, from the PDF, final state of animated slides), `slides.md` (pptx-to-markdown text and speaker notes, `# Slide N` per slide; image links and alt text dropped, the PNGs carry the images), `talk.json` (title, speaker, event, date, duration, slide count, animated slides, optional `note` with the slide mapping when deck and PDF differ). Date is month precision for askui and year only for EclipseCon and Dragons (not in the decks)
 - `slides.md` keeps the social-handle footer of each slide (e.g. `@chrissbaumann #EclipseCon`); unspoken-content checks must ignore it
 
 ## Conventions

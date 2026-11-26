@@ -18,3 +18,8 @@ ECLIPSE=extreme-learning-eclipsecon
 copy $ECLIPSE "2020 EclipseCon.mp4" video.mp4
 copy $ECLIPSE "Extreme learning situations as testers EclipseCon.pptx" deck.pptx
 copy $ECLIPSE "Extreme learning situations as testers EclipseCon.pdf" deck.pdf
+
+DRAGONS=dragons-agiletd
+copy $DRAGONS "Dragons biases and other things you shouldnt ignore AgileTD 2025.mp4" video.mp4
+copy $DRAGONS "Dragons, biases, and other things you shouldn’t ignore.pptx" deck.pptx
+copy $DRAGONS "Dragons, biases, and other things you shouldn’t ignore.pdf" deck.pdf
