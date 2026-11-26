@@ -1,5 +1,6 @@
 ---
 id: 03
+status: done
 dependencies: []
 ---
 
@@ -25,16 +26,21 @@ Commit message direction: "Transcribe talks with word timestamps" and "Format tr
 
 ## Work
 
-* [ ] `transcribe.py <video> --out <dir> [--language en|de|...] [--initial-prompt <text>]`: calls `mlx_whisper` (model large-v3, `--word_timestamps True`), writes `<dir>/whisper.json`, prints detected language
-* [ ] `transcript.py <whisper.json> [--slices <dir>] --out transcript.md`: groups segments into paragraphs (pause-based), one `[HH:MM:SS]` per paragraph, slide markers placed at the word nearest to each slice timestamp
-* [ ] `transcript.py <whisper.json> --excerpt HH:MM:SS-HH:MM:SS`: prints words in that range
-* [ ] Unit tests for paragraphing, marker placement and excerpt with a small `whisper.json` fixture (no model run)
-* [ ] Add test and run commands to `CLAUDE.md`
+* [x] `transcribe.py <video> --out <dir> [--language en|de|...] [--initial-prompt <text>]`: calls `mlx_whisper` (model large-v3, `--word_timestamps True`), writes `<dir>/whisper.json`, prints detected language
+* [x] `transcript.py <whisper.json> [--slices <dir>] --out transcript.md`: groups segments into paragraphs (pause-based), one `[HH:MM:SS]` per paragraph, slide markers placed at the word nearest to each slice timestamp
+* [x] `transcript.py <whisper.json> --excerpt HH:MM:SS-HH:MM:SS`: prints words in that range
+* [x] Unit tests for paragraphing, marker placement and excerpt with a small `whisper.json` fixture (no model run)
+* [x] Add test and run commands to `CLAUDE.md`
 
 ## Verification
 
-* [ ] Unit tests pass without `mlx_whisper` installed
-* [ ] On the EclipseCon video, `whisper.json` has word timestamps and `transcript.md` reads as paragraphs with timestamps
-* [ ] With the EclipseCon slices, every slice has exactly one marker, in time order
-* [ ] An excerpt of a range holds only words whose start lies in that range
-* [ ] Detected language is printed and matches the talk's spoken language
+* [x] Unit tests pass without `mlx_whisper` installed
+  **Note:** Verified via the CLAUDE.md test command with `PATH` stripped of `mlx_whisper`: 16 passed (tests use `build_command` and `transcript` only).
+* [x] On the EclipseCon video, `whisper.json` has word timestamps and `transcript.md` reads as paragraphs with timestamps
+  **Note:** Verified via a full run on the EclipseCon video: 3567 words with start/end times, 84 paragraphs with `[HH:MM:SS]`, readable text. A first run looped on repeated sentences; fixed with `--condition-on-previous-text False`.
+* [x] With the EclipseCon slices, every slice has exactly one marker, in time order
+  **Note:** Verified with the 95 real video-slicer slices of the EclipseCon video: 95 unique markers, 0001 to 0095 in order. Unit tests cover duplicates, slices in silence and after the last word.
+* [x] An excerpt of a range holds only words whose start lies in that range
+  **Note:** Verified via unit tests (range, exclusive end, empty) and the CLI on the real `whisper.json`: word counts match the words with start in `[start, end)`.
+* [x] Detected language is printed and matches the talk's spoken language
+  **Note:** Verified via the full run and a 30 s clip run: `language: en`, talk is English.

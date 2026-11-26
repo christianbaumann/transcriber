@@ -50,6 +50,23 @@ User-visible behavior (output layout and formats, article language, info area, r
   ```
   The tests live under the vendored skill (not a root `tests/`) so they do not clash with later skill tests; the `-o pythonpath` replaces the source repo's `pyproject.toml` setting. Two path constants in `test_detect.py` and `test_score_pipeline.py` differ from upstream for that layout.
 
+Scripts live in `.claude/skills/transcribing-talks/scripts/` (PEP 723, run with `uv`):
+
+```bash
+# tests (no model needed)
+uv run --with pytest pytest .claude/skills/transcribing-talks/scripts/tests
+# transcription: writes <dir>/whisper.json, prints language
+.claude/skills/transcribing-talks/scripts/transcribe.py <video> --out <dir> [--language de] [--initial-prompt '<terms>']
+# transcript with slide markers / excerpt of a range
+.claude/skills/transcribing-talks/scripts/transcript.py <dir>/whisper.json --slices <video>-slices --out <dir>/transcript.md
+.claude/skills/transcribing-talks/scripts/transcript.py <dir>/whisper.json --excerpt 00:12:00-00:13:30
+```
+
+- `transcribe.py` uses `mlx_whisper` from PATH, else `uvx --from mlx-whisper`; model `mlx-community/whisper-large-v3-mlx`
+- `mlx_whisper` exits 0 when the model download fails (e.g. `~/.cache/huggingface/hub` symlink to an unmounted drive); set `HF_HUB_CACHE` to override
+- `transcribe.py` passes `--condition-on-previous-text False`: with it on, whisper repeated sentences in loops on a 22 min talk; `--initial-prompt` keeps names and terms consistent
+- Excerpt range is `[start, end)` on word start times
+
 ## Conventions
 
 - Trunk is `main` (no `development` branch in this repo)

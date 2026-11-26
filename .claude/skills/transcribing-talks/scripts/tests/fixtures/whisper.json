@@ -1,0 +1,26 @@
+{
+  "text": " Welcome to the talk. Today we cover testing. Now the second part begins here.",
+  "language": "en",
+  "segments": [
+    {"start": 0.0, "end": 4.0, "text": " Welcome to the talk. Today we cover testing.",
+     "words": [
+       {"word": " Welcome", "start": 0.0, "end": 0.5, "probability": 0.9},
+       {"word": " to", "start": 0.5, "end": 0.7, "probability": 0.9},
+       {"word": " the", "start": 0.7, "end": 0.9, "probability": 0.9},
+       {"word": " talk.", "start": 0.9, "end": 1.4, "probability": 0.9},
+       {"word": " Today", "start": 2.0, "end": 2.5, "probability": 0.9},
+       {"word": " we", "start": 2.5, "end": 2.7, "probability": 0.9},
+       {"word": " cover", "start": 2.7, "end": 3.2, "probability": 0.9},
+       {"word": " testing.", "start": 3.2, "end": 4.0, "probability": 0.9}
+     ]},
+    {"start": 65.0, "end": 69.0, "text": " Now the second part begins here.",
+     "words": [
+       {"word": " Now", "start": 65.0, "end": 65.4, "probability": 0.9},
+       {"word": " the", "start": 65.4, "end": 65.6, "probability": 0.9},
+       {"word": " second", "start": 65.6, "end": 66.2, "probability": 0.9},
+       {"word": " part", "start": 66.2, "end": 66.6, "probability": 0.9},
+       {"word": " begins", "start": 66.6, "end": 67.2, "probability": 0.9},
+       {"word": " here.", "start": 67.2, "end": 69.0, "probability": 0.9}
+     ]}
+  ]
+}
