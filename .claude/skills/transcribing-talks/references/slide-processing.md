@@ -130,7 +130,7 @@ Done when: `$OUT/images/NNNN.png` exists, was looked at and is better than the o
 
 ## 6. Find what the speaker did not say
 
-Compare the slide content with `EXCERPT`. List in `unspoken` each piece of slide content that the excerpt does not mention or that goes beyond it: list items, numbers, names, references, labels, table cells. One line each, naming the item and its form, for example `Latency numbers per region (table)`. Paraphrase in the speaker's tolerance: a bullet worded differently but said counts as spoken. Titles and headings count as content: list one that the excerpt never says (for example an organization's full name). Group many small items of one diagram or table in one line. Skip the footer strip and decoration.
+Compare the slide content with `EXCERPT`. List in `unspoken` each piece of slide content that the excerpt does not mention or that goes beyond it: list items, numbers, names, references, labels, table cells. One line each, naming the item and its form, for example `Latency numbers per region (table)`. Paraphrase in the speaker's tolerance: a bullet worded differently but said counts as spoken. Titles and headings count as content: list one that the excerpt never says (for example an organization's full name). Group many small items of one diagram or table in one line. Skip the footer strip and decoration. `unspoken` lists content only: never the picture itself or a description of it (the `[Image: ...]` line in the body covers that). A slide whose only unspoken part is a photo has `unspoken: []`.
 
 If everything is spoken, write `unspoken: []`.
 

@@ -41,6 +41,7 @@ Done when: you know the talk's topics in order and which slides, if any, carry s
 - Give the article a title: the title slide's text, else the speaker's introduction ("my talk ..."), else the transcript's topic. `OUTLINE` states it; the info area may replace it.
 - Ranges tile the talk: the first range starts at the first spoken word, each range ends where the next begins, the last ends at the end of the transcript. Times are `[HH:MM:SS]` of transcript paragraphs; slide numbers from the `→ slide` markers (`slides 3-9`: first slide shown in the range to last). A slide shown across a boundary belongs to the range where it first appears.
 - Opening (greeting, who the speaker is, what the talk is about) and closing (thanks, questions): keep what has content as the first or last chapter (the motivation or the summary), drop the rest by listing the range under `Not in article`.
+- The article ends with a conclusion. When the talk has a summary or closing chapter of its own, title it `Conclusion` (German `Fazit`); it is the conclusion. Otherwise the outline gets no conclusion chapter: the edit pass writes one. A Q&A chapter stays a chapter of its own and comes before the conclusion.
 
 Done when: every spoken minute is in exactly one chapter range or in `Not in article`; chapter count fits the talk (a chapter is about 2 to 10 minutes, rarely a single paragraph).
 
@@ -124,7 +125,7 @@ Write `CHAPTER_FILE`. Content, in this order of priority: what the speaker says,
   - diagram: `![caption](diagrams/NNNN-name.svg)` using the `.svg` (or `.png`) in `assets`, never the `.drawio` or `.mmd` source; add one or two sentences saying what it shows, from the note's description, so the text works without the picture
 - Images: a note with `show_screenshot: true` has `edited_image`. Show it as `![caption](images/NNNN.png)` only when it earns its place: the speaker refers to it ("the guy on the right", "this comic"), it is a tool or UI screenshot, or it illustrates a concrete example. Put it after the paragraph where the slide appears. For a run of slides with the same picture, use the slide where the speaker refers to it, otherwise the first slide of the run. `show_screenshot: true` only means the image is available: a decorative photo the speaker never refers to, and any picture the text does not need, is omitted. A run of slides with the same picture shows it at most once. The caption is one factual line from the note's `[Image: ...]` text. With `show_screenshot: false` show nothing, whatever the kind.
 - Paths: relative to `OUT` (`images/...`, `diagrams/...`), exactly as in the note. Never the slice path, `reference/` or an absolute path.
-- Unspoken content: every `unspoken` item of every note in the range appears in the chapter in its natural place, as prose, list item or table, in the chapter's language. A title that names an organization in full: give the full name at first mention ("the CSSF (Commission de Surveillance du Secteur Financier)"). Do not mark it as coming from a slide.
+- Unspoken content: every `unspoken` item of every note in the range appears in the chapter in its natural place, as prose, list item or table, in the chapter's language. The Images rule wins: an item that only describes a picture (an older note may list one) is not text to place, and the picture stays omitted unless the Images rule shows it. A title that names an organization in full: give the full name at first mention ("the CSSF (Commission de Surveillance du Secteur Financier)"). Do not mark it as coming from a slide.
 - Do not repeat what a neighbour chapter covers. When a point depends on one, refer to it in a clause ("see chapter 3") instead of explaining again; the edit pass checks the references.
 - Length follows the content. Do not pad.
 
@@ -175,8 +176,9 @@ Write `ARTICLE`:
 3. Duplicates: when two chapters say the same thing (a definition, an example, an `unspoken` item, an image), keep it where the outline puts the topic and replace the other with a short reference ("see 2.1") or remove it. A term is defined once, at first use. An image or diagram appears once.
 4. One voice: the same person and tense for the speaker's experience reports (third person, past tense), present tense for advice and facts, the same term for the same thing across chapters, consistent list style, the same spelling variant of the language. Rewrite only what differs.
 5. Cross references: where a chapter points to another ("see chapter 3"), use a link to the heading, `[3. Managing expectations](#3-managing-expectations)` (GitHub anchor rule, which the HTML build uses too: lowercase, spaces to hyphens, punctuation removed, digits kept: `## 4.3 Too many arguments` is `#43-too-many-arguments`). Check every target exists; the HTML build fails on a link without a heading.
-6. Transitions: add at most one sentence where a chapter starts without context. No introduction, summary or conclusion that no chapter contains.
-7. Keep every distinct point, number, name, list, quote, table, formula and image that the chapters have, except exact duplicates. Add no facts.
+6. Transitions: add at most one sentence where a chapter starts without context. No introduction or summary that no chapter contains.
+7. Conclusion: the last `##` chapter is the conclusion (`## N. Conclusion`, German `## N. Fazit`), after any Q&A chapter. If a chapter titled Conclusion or Fazit exists, it is the conclusion: keep it, and move a Q&A chapter that follows it before it (renumber, fix links). If none exists, write one as the last chapter: 1 to 2 paragraphs that wrap up the key points of the chapters in the chapters' words, with no new fact, number, name or claim. Its number follows the last chapter.
+8. Keep every distinct point, number, name, list, quote, table, formula and image that the chapters have, except exact duplicates. Add no facts.
 
 Done when: the article has the info area, all chapters in order and no point lost.
 
@@ -184,10 +186,11 @@ Done when: the article has the info area, all chapters in order and no point los
 
 Fix what fails:
 
-1. One `#` heading (the title). Chapter and subchapter numbers run without gaps.
+1. One `#` heading (the title). Chapter and subchapter numbers run without gaps. The last `##` is the conclusion, after any Q&A chapter.
 2. Every image path exists below `OUT`; no path points to a slice folder or `reference/`; no image appears twice.
 3. No paragraph appears twice (check with a short script comparing normalized paragraphs, and sentences of 8 or more words across chapters).
 4. Every link target exists.
+4a. Image check: list every image in the article with its note's `kind`, `show_screenshot`, and whether the chapter text refers to it. Remove an image that is a photo (`kind: photo`) the text does not refer to.
 5. The words of `INFO` values appear in the info area, and no other value is invented.
 6. You created no files except `ARTICLE` and temp files, which you delete.
 
