@@ -100,3 +100,21 @@ def test_cli_missing_image_exits_1_naming_path(tmp_path):
                             capture_output=True, text=True)
     assert result.returncode == 1
     assert "images/nope.png" in result.stderr
+
+
+@needs_pandoc
+def test_link_to_numbered_heading_resolves(tmp_path):
+    article = tmp_path / "a.md"
+    article.write_text("# T\n\n## 4.3 Too many arguments\n\nText.\n\nSee [4.3 Too many arguments](#43-too-many-arguments).\n")
+    out = tmp_path / "a.html"
+    build_html.build(article, out)
+    assert 'id="43-too-many-arguments"' in out.read_text(encoding="utf-8")
+
+
+@needs_pandoc
+def test_broken_internal_link_fails_naming_it(tmp_path):
+    article = tmp_path / "a.md"
+    article.write_text("# T\n\n## 1. One\n\nSee [x](#9-missing) and [y](#1-one).\n")
+    with pytest.raises(build_html.BuildError, match="#9-missing") as e:
+        build_html.build(article, tmp_path / "a.html")
+    assert "#1-one" not in str(e.value)

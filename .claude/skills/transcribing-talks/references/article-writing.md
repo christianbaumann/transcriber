@@ -174,7 +174,7 @@ Write `ARTICLE`:
 2. Chapters in outline order below it, headings unchanged (`##`, `###`).
 3. Duplicates: when two chapters say the same thing (a definition, an example, an `unspoken` item, an image), keep it where the outline puts the topic and replace the other with a short reference ("see 2.1") or remove it. A term is defined once, at first use. An image or diagram appears once.
 4. One voice: the same person and tense for the speaker's experience reports (third person, past tense), present tense for advice and facts, the same term for the same thing across chapters, consistent list style, the same spelling variant of the language. Rewrite only what differs.
-5. Cross references: where a chapter points to another ("see chapter 3"), use a link to the heading, `[3. Managing expectations](#3-managing-expectations)` (pandoc anchor: lowercase, spaces to hyphens, punctuation removed). Check every target exists.
+5. Cross references: where a chapter points to another ("see chapter 3"), use a link to the heading, `[3. Managing expectations](#3-managing-expectations)` (GitHub anchor rule, which the HTML build uses too: lowercase, spaces to hyphens, punctuation removed, digits kept: `## 4.3 Too many arguments` is `#43-too-many-arguments`). Check every target exists; the HTML build fails on a link without a heading.
 6. Transitions: add at most one sentence where a chapter starts without context. No introduction, summary or conclusion that no chapter contains.
 7. Keep every distinct point, number, name, list, quote, table, formula and image that the chapters have, except exact duplicates. Add no facts.
 

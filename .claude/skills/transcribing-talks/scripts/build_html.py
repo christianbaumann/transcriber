@@ -17,6 +17,8 @@ from pathlib import Path
 
 CSS = Path(__file__).with_name("article.css")
 PANDOC_RESOURCE_WARNING = "Could not fetch resource"
+ID_ATTR = re.compile(r'\bid="([^"]*)"')
+INTERNAL_HREF = re.compile(r'\bhref="#([^"]*)"')
 
 
 class BuildError(Exception):
@@ -28,6 +30,11 @@ def page_title(markdown: str, fallback: str) -> str:
     return heading.group(1).strip() if heading else fallback
 
 
+def broken_links(html: str) -> list[str]:
+    ids = set(ID_ATTR.findall(html))
+    return sorted({f"#{t}" for t in INTERNAL_HREF.findall(html) if t not in ids})
+
+
 def build(article: Path, out: Path) -> None:
     pandoc = shutil.which("pandoc")
     if not pandoc:
@@ -36,7 +43,7 @@ def build(article: Path, out: Path) -> None:
         raise BuildError(f"article not found: {article}")
     markdown = article.read_text(encoding="utf-8")
     cmd = [
-        pandoc, str(article), "--from=markdown", "--standalone", "--embed-resources",
+        pandoc, str(article), "--from=markdown+gfm_auto_identifiers", "--standalone", "--embed-resources",
         "--math-method=katex", f"--css={CSS}", f"--resource-path={article.parent}",
         f"--metadata=pagetitle:{page_title(markdown, article.stem)}",
         "--output", str(out),
@@ -47,6 +54,9 @@ def build(article: Path, out: Path) -> None:
         raise BuildError("image not found: " + "; ".join(l.split(PANDOC_RESOURCE_WARNING)[1].strip() for l in unresolved))
     if result.returncode != 0:
         raise BuildError(f"pandoc failed:\n{result.stderr.strip()}")
+    broken = broken_links(out.read_text(encoding="utf-8"))
+    if broken:
+        raise BuildError("internal link without matching heading id: " + ", ".join(broken))
 
 
 def main() -> int:
