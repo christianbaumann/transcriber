@@ -46,7 +46,7 @@ uv run .claude/skills/transcribing-talks/evals/grade.py <article dir> <ground tr
 
 ## Results
 
-Run date 2026-11-26.
+Run dates 2026-11-26 (first two talks) and 2026-11-27 (Dragons).
 
 ### Extreme learning situations as testers (EclipseCon, 31 slides, 22 min)
 
@@ -73,3 +73,25 @@ Full skill run following `SKILL.md` (subagents on sonnet, review gate answered a
 | Heading depth | 2, pass |
 
 Slides 52 to 55 (Ressources, Images) were never on screen: sampled every 5 s from 32:40 to the end, the frames show slide 49, 50, then slide 51 (Q&A) from 33:15 until the last seconds, and no frame matches 52 to 55. They are therefore listed under `not_shown` in `talk.json`, added after the first grading, which counted them as missed: recall was 0.93 (50 of 54 counted, missed 52-55, repeat 18) before and is 1.00 (50 of 50) with `not_shown`. Slide 18 is a repeat of slide 12 (same picture).
+
+### Dragons, biases and other things you shouldn't ignore (AgileTD 2025, 33 slides, 43 min)
+
+Full skill run following `SKILL.md` (subagents on sonnet, at most 4 at once instead of `MAX_PARALLEL` 6), local file `video.mp4`, `grade.py` on its output. Whisper detected `de` (the first ~6 min are German small talk and the session chair), so transcription was rerun with `--language en --initial-prompt 'Dragons, biases, AgileTD'`. The slicer found 242 candidates, kept 28 (crop 1160x652+659+214, no overlay) and warned about mixed layouts. Review gate: 0 re-created items (illustrations only); title and speaker in `info.json` came from the spoken introduction with ASR errors and were set from `talk.json` in the review answers.
+
+| Check | Result |
+|---|---|
+| Required files | pass |
+| Slide recall | 0.85, FAIL against 0.90 (28 of 33 counted, 28 kept; missed 1, 3, 4, 29, 33) |
+| Unspoken coverage | 0.81 of 16 lines, pass (not in the article: slide 6 "Institutionalised denial", slide 8 "Larger groups → effect gets worse", slide 22 "Evaluate metrics regularly") |
+| Heading depth | 2, pass |
+
+Every missed slide is on screen at some point (checked with ffmpeg samples every 15 s, finer around the misses), so `not_shown` is not set:
+
+- Slide 1: only on the stage projector in room shots, 6:00-8:55, partly covered; never a screen capture
+- Slides 3 and 4: 9:30-10:07 in a second layout (large slide left, small stage inset right) that the slicer skipped
+- Slide 29: embedded video shown 34:31-34:49; the slicer kept the black player frame with a play button (slice 0025, 34:41) instead of the poster frame
+- Slide 33 ("Thank you", QR code): shown 37:47-38:10, but the slicer kept nothing after 37:15 (slide 32)
+
+Grader false pair: slice 0025 (black player frame, really slide 29) was matched to deck slide 2 at similarity 0.81, above `MIN_SIMILARITY`. Slide 2 is only on the stage projector. True recall is therefore 27 of 33 = 0.82; dark slides match each other.
+
+Article: 7 chapters, no images (every slide is a decorative illustration the speakers never refer to). The Q&A (38:06-42:58) is left out as designed. ASR garbled the Discworld names (Vimes, Vetinari, Ankh-Morpork); the chapter writers avoided or unified them.

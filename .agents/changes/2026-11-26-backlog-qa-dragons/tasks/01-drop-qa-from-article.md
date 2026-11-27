@@ -40,4 +40,5 @@ The article no longer has a Q&A chapter: the outline lists the Q&A range under `
   **Note:** Verified via `git diff`: only lines 43, 44, 180, 189 changed; the check script already accepts `Not in article` ranges.
 * [x] Repository tests pass: `uv run --with pytest --with pyyaml --with numpy --with pillow --with scipy pytest .claude/skills/transcribing-talks/scripts/tests`
   **Note:** 63 passed.
-* [ ] Behavioral check on a real run happens in task 03
+* [x] Behavioral check on a real run happens in task 03
+  **Note:** Passed on the Dragons run: the outline lists `Not in article: [00:38:06-end] Q&A`, and `article.md` has no Q&A chapter (see task 03).

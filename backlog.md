@@ -1,2 +1,8 @@
-- update skill with new reference pdf/pptx/mp4: "Dragons..." in ~/Downloads
-
+- Language detection: whisper's auto-detect is fooled by pre-talk chat in another language. Detect from a later sample or from the first speech after a long gap, or ask.
+- Slicer skips slides in a second layout (AgileTD: slides 3-4, 9:30-10:45). Support several layouts per video.
+- Slicer keeps the black player frame of an embedded video instead of its poster frame (AgileTD slide 29).
+- Slicer drops the last slide ("Thank you") shown right before the Q&A (AgileTD slide 33, 37:47-38:10).
+- A missing title slide leaves info.json with ASR errors in title and speaker. Cross-check names against slide text or the file name.
+- Edit pass: info area bullet order not enforced; the scripted duplicate check was skipped; subchapter numbering is inconsistent across chapters.
+- Slide agents treat the slide viewer's page widget inconsistently. Define one rule (leave it, or remove it in all slides).
+- grade.py: a black slice matches a dark deck slide (0.81 > MIN_SIMILARITY 0.65). Pairs between low-content images need a stricter check.
