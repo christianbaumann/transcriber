@@ -16,7 +16,7 @@
     {
       "id": 1,
       "prompt": "Turn the recording of my EclipseCon talk, testdata/talks/extreme-learning-eclipsecon/video.mp4, into an article.",
-      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "expected_output": "out/<name>/article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
       "files": [
         "../../../testdata/talks/extreme-learning-eclipsecon/video.mp4"
       ],
@@ -31,7 +31,7 @@
     {
       "id": 2,
       "prompt": "Write an article from this talk recording: testdata/talks/fool-with-a-tool/video.mp4",
-      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "expected_output": "out/<name>/article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
       "files": [
         "../../../testdata/talks/fool-with-a-tool/video.mp4"
       ],
@@ -46,7 +46,7 @@
     {
       "id": 3,
       "prompt": "Turn this conference talk recording into an article: testdata/talks/dragons-agiletd/video.mp4",
-      "expected_output": "<video>-article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
+      "expected_output": "out/<name>/article/ with article.md, article.html, transcript.md, whisper.json and imagemagick.log; at least 90% of the deck's slides kept; at least 70% of the slide text not spoken in the talk is in the article; chapters with sub-headings.",
       "files": [
         "../../../testdata/talks/dragons-agiletd/video.mp4"
       ],

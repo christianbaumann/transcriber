@@ -77,12 +77,12 @@ def truth(tmp_path):
 @pytest.fixture
 def run(tmp_path):
     """Article folder plus slices for deck slides 1 and 3 (webcam inset, other size)."""
-    article = tmp_path / "talk-article"
-    article.mkdir()
+    article = tmp_path / "run" / "article"
+    article.mkdir(parents=True)
     for name, text in (("article.md", ARTICLE), ("article.html", "<html/>"), ("transcript.md", TRANSCRIPT),
                        ("whisper.json", "{}"), ("imagemagick.log", "")):
         (article / name).write_text(text)
-    slices = tmp_path / "talk-slices"
+    slices = tmp_path / "run" / "slices"
     slices.mkdir()
     picture(slices / "0001_00-00-00.png", 0, inset=True, size=(1920, 1050))
     picture(slices / "0002_00-01-00.png", 2, inset=True, size=(1920, 1050))
@@ -204,6 +204,13 @@ def test_cli_writes_grading_json_and_exits_1_on_failure(run, truth, tmp_path):
     assert json.loads(out.read_text())["summary"]["failed"] == 0
     (article / "whisper.json").unlink()
     assert grade.main(["grade.py", str(article), str(truth), "--out", str(out)]) == 1
+
+
+def test_cli_defaults_slices_to_folder_next_to_article(run, truth, tmp_path):
+    article, _ = run
+    out = tmp_path / "grading.json"
+    grade.main(["grade.py", str(article), str(truth), "--out", str(out)])
+    assert json.loads(out.read_text())["metrics"]["slide_recall"] > 0
 
 
 def test_repeat_of_earlier_slide_is_not_missed(run, truth):

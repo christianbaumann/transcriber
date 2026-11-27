@@ -12,7 +12,7 @@ Thresholds and required files are named values at the top of `evals.json`, nowhe
 uv run .claude/skills/transcribing-talks/evals/grade.py <article dir> <ground truth dir> [--slices DIR] [--out grading.json]
 ```
 
-- `<article dir>`: the run's `<video>-article/`; `--slices` defaults to `<video>-slices/` next to it
+- `<article dir>`: the run's `out/<name>/article/`; `--slices` defaults to `slices/` next to it
 - Writes `grading.json` (`expectations` with `text`, `passed`, `evidence`; `metrics`; `summary`) to `--out` (default: `./grading.json`); exit code 1 if a check fails
 - Tests: `uv run --with pytest --with numpy --with pillow --with scipy pytest .claude/skills/transcribing-talks/scripts/tests/test_grade.py`
 
@@ -25,7 +25,7 @@ uv run .claude/skills/transcribing-talks/evals/grade.py <article dir> <ground tr
 | Unspoken-content coverage | >= 0.70 |
 | Heading depth | >= 2 (a `###` below a `##` chapter, the `#` title not counted) |
 
-- **Slide recall:** kept slices (`<video>-slices/`) are matched 1:1 to the deck PNGs by pixel agreement of 96x54 grayscale thumbnails, as an optimal assignment (`scipy`). Recall = matched / counted deck slides. Not counted (listed in `grading.json`):
+- **Slide recall:** kept slices (`out/<name>/slices/`) are matched 1:1 to the deck PNGs by pixel agreement of 96x54 grayscale thumbnails, as an optimal assignment (`scipy`). Recall = matched / counted deck slides. Not counted (listed in `grading.json`):
   - build steps: slides whose text (without title) is a proper subset of the next slide's
   - repeats: slides whose picture equals an earlier counted slide (the slicer keeps only the first)
   - slides never shown: `not_shown` in the deck's `talk.json` (`{"slides": [..], "reason": ".."}`), set only after checking the video

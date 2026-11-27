@@ -7,9 +7,9 @@
 
 grade.py <article dir> <ground truth dir> [--slices DIR] [--out grading.json]
 
-<article dir>: the run's `<video>-article/`. <ground truth dir>: `testdata/talks/<name>/`
-(`slides/NN.png`, `slides.md`). --slices defaults to the article dir with `-article`
-replaced by `-slices`. Exits 1 if a check fails.
+<article dir>: the run's `out/<name>/article/`. <ground truth dir>: `testdata/talks/<name>/`
+(`slides/NN.png`, `slides.md`). --slices defaults to `slices/` next to the
+article dir. Exits 1 if a check fails.
 """
 import argparse
 import html
@@ -232,7 +232,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--out", type=Path, default=Path("grading.json"))
     args = parser.parse_args(argv[1:])
     article_dir = args.article_dir.resolve()
-    slices = args.slices or article_dir.with_name(re.sub(r"-article$", "-slices", article_dir.name))
+    slices = args.slices or article_dir.parent / "slices"
     grading = grade(article_dir, args.truth_dir, slices, load_config())
     args.out.write_text(json.dumps(grading, indent=2, ensure_ascii=False))
     for e in grading["expectations"]:
