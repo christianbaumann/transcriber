@@ -42,6 +42,16 @@ def test_chapter_excerpts_follow_outline_ranges(tmp_path):
     assert files[1].read_text().strip() == "Now the second part begins here."
 
 
+def test_chapter_excerpts_accept_title_slide_and_divider_lines(tmp_path):
+    outline = tmp_path / "outline.md"
+    outline.write_text("---\ntitle: T\ntitle_slide: 1\n---\n\n## 1. One [00:00:00-00:01:00] slides 1-1\n"
+                       "Covers: one\n\n"
+                       "## 2. Two [00:01:00-end] slides 2-2\nDivider: 2\nCovers: two\n")
+    files = pipeline.chapter_excerpts(WHISPER, outline, tmp_path / "ch")
+    assert [f.name for f in files] == ["01.txt", "02.txt"]
+    assert files[1].read_text().strip() == "Now the second part begins here."
+
+
 def test_reference_copies_originals_of_slides_with_review_items(tmp_path):
     article = tmp_path / "review"
     shutil.copytree(FIXTURES / "review", article)

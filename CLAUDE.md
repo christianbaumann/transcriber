@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/` and `.agents/changes/2026-11-26-backlog-qa-dragons/`; all tasks done. Open skill defects are in `backlog.md`. The orchestrator `transcribing-talks/SKILL.md` runs the full pipeline; `transcribing-talks/evals/` grades runs against the reference talks.
+Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/` and `.agents/changes/2026-11-26-backlog-qa-dragons/`; all tasks done. `.agents/changes/2026-11-27-key-slides/` (slide images in the article, multi-layout slicing): tasks 03 to 05 done, 01, 02, 06 open. Open skill defects are in `backlog.md`. The orchestrator `transcribing-talks/SKILL.md` runs the full pipeline; `transcribing-talks/evals/` grades runs against the reference talks.
 
 ## Dependencies on sibling projects
 
@@ -46,6 +46,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Speaker inset:** the slicer agent crops a webcam overlay out when it can, else reports it as `overlay` (`WxH+X+Y` in slice pixels); the orchestrator passes it as `OVERLAY` to the slide agents, which fill it with the background in edited images when it covers no slide content
 - **Concurrency:** `MAX_PARALLEL = 6` subagents at once (per-slide, per-chapter); fixes after the review run one after another because they edit `article.md`
 - **One `info.json`:** the orchestrator writes `$WORK/info.json` (keys as `review.py` expects) before the outline; it is the edit brief's `INFO` and the review page's `--info`. `answers.json` info values go back into `info.json` and the article's info area; `fix` items are redone by one subagent per slide, which also edits the article (the brief names the changed text so prose that quotes it is updated too)
+- **Slide images:** every slide note has `edited_image`, also `text` slides; `show_screenshot` only feeds the writers' rules. The outline names `title_slide: N` (front matter) and `Divider: N` (line after a `##` heading); a chapter with a divider starts at the paragraph holding its marker. Writers place the divider below `##`, the edit pass the title slide below the info area. Design: `.agents/changes/2026-11-27-key-slides/design.md`
 - **Review order:** per design the review page comes after the edit pass, so answers are applied to a finished `article.md`
 - **Info area / title:** fallback order for the title is title slide or speaker's introduction, then file or video name
 
