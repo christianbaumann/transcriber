@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/`; all tasks done. The orchestrator `transcribing-talks/SKILL.md` runs the full pipeline; `transcribing-talks/evals/` grades runs against the reference talks.
+Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/` and `.agents/changes/2026-11-26-backlog-qa-dragons/`; all tasks done. Open skill defects are in `backlog.md`. The orchestrator `transcribing-talks/SKILL.md` runs the full pipeline; `transcribing-talks/evals/` grades runs against the reference talks.
 
 ## Dependencies on sibling projects
 

@@ -4,10 +4,11 @@ A Claude Code skill (`transcribing-talks`) that turns a video recording of a tal
 
 ## Status
 
-Usable. Ask Claude Code to turn a talk video or a YouTube URL into an article; the skill `transcribing-talks` (`.claude/skills/transcribing-talks/SKILL.md`) runs the pipeline. Verified on a 22 min talk with 25 slides.
+Usable. Ask Claude Code to turn a talk video or a YouTube URL into an article; the skill `transcribing-talks` (`.claude/skills/transcribing-talks/SKILL.md`) runs the pipeline. Verified on three reference talks (22, 46 and 43 min); results and known gaps in the [evals README](.claude/skills/transcribing-talks/evals/README.md#results), planned changes in [backlog.md](backlog.md).
 
 - [Design](.agents/changes/2026-11-26-talk-to-article/design.md): pipeline, output layout, decisions
 - [Tasks](.agents/changes/2026-11-26-talk-to-article/tasks/): implementation slices and their dependencies
+- [Q&A drop and third reference talk](.agents/changes/2026-11-26-backlog-qa-dragons/design.md)
 
 ## Usage
 
