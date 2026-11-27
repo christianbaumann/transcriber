@@ -1,6 +1,7 @@
 ---
 id: 02
 dependencies: []
+status: done
 ---
 
 # Task 02: Grader finds the slices next to the article folder
@@ -27,13 +28,20 @@ Commit subject direction: "Default grader slices to the run's slices folder".
 
 ## Work
 
-* [ ] Test first: CLI test in `test_grade.py` that builds `<tmp>/run/article/` and `<tmp>/run/slices/`, calls `grade.main` without `--slices`, and checks that slide recall uses the sibling slices
-* [ ] Change the default in `grade.main`; drop the `re` import if it becomes unused
-* [ ] Update the docstring, evals README and `expected_output` texts
+* [x] Test first: CLI test in `test_grade.py` that builds `<tmp>/run/article/` and `<tmp>/run/slices/`, calls `grade.main` without `--slices`, and checks that slide recall uses the sibling slices
+  **Note:** `test_cli_defaults_slices_to_folder_next_to_article`; `run` fixture now builds `run/article/` + `run/slices/`; added `test_cli_explicit_slices_override_sibling_folder`
+* [x] Change the default in `grade.main`; drop the `re` import if it becomes unused
+  **Note:** `re` is still used elsewhere in `grade.py`, so the import stays
+* [x] Update the docstring, evals README and `expected_output` texts
+  **Note:** docstring, evals README (2 lines), all 3 `expected_output` entries say `out/<name>/article/`
 
 ## Verification
 
-* [ ] New test fails before the change, passes after
-* [ ] Existing `test_grade.py` tests pass, including `test_evals_json_expectations_match_grader`
-* [ ] `grep -nE '<video>-(article|slices)|-article\$' .claude/skills/transcribing-talks/evals` finds nothing
-* [ ] Full test suite passes (CLAUDE.md "Commands")
+* [x] New test fails before the change, passes after
+  **Note:** recall 0.00 against `grade.py` from main, 1.0 after
+* [x] Existing `test_grade.py` tests pass, including `test_evals_json_expectations_match_grader`
+  **Note:** pytest `test_grade.py`
+* [x] `grep -nE '<video>-(article|slices)|-article\$' .claude/skills/transcribing-talks/evals` finds nothing
+  **Note:** grep exits 1, no output
+* [x] Full test suite passes (CLAUDE.md "Commands")
+  **Note:** 66 passed

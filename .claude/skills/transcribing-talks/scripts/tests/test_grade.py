@@ -210,7 +210,17 @@ def test_cli_defaults_slices_to_folder_next_to_article(run, truth, tmp_path):
     article, _ = run
     out = tmp_path / "grading.json"
     grade.main(["grade.py", str(article), str(truth), "--out", str(out)])
-    assert json.loads(out.read_text())["metrics"]["slide_recall"] > 0
+    assert json.loads(out.read_text())["metrics"]["slide_recall"] == 1.0
+
+
+def test_cli_explicit_slices_override_sibling_folder(run, truth, tmp_path):
+    article, slices = run
+    elsewhere = tmp_path / "elsewhere"
+    slices.rename(elsewhere)
+    (article.parent / "slices").mkdir()
+    out = tmp_path / "grading.json"
+    grade.main(["grade.py", str(article), str(truth), "--slices", str(elsewhere), "--out", str(out)])
+    assert json.loads(out.read_text())["metrics"]["slide_recall"] == 1.0
 
 
 def test_repeat_of_earlier_slide_is_not_missed(run, truth):
