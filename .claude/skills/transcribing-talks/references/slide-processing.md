@@ -58,8 +58,9 @@ Done when: `kind` is one value from the list.
 - `diagram` slides that are fully labelled are `false` even when curves are only approximated. For `photo`, `screenshot` and visuals that cannot be redrawn faithfully, `true` when unsure.
 
 - A meme (a known meme format, or an image macro or cartoon used for humor) is always `show_screenshot: true`, whatever its `kind` (a meme next to code is `mixed`). Mark it with `meme: true` in the note (see the note format).
+- `show_screenshot` does not decide whether an edited image is made: step 5 makes one for every slide, because the outline and the writers may show any slide (title slide, chapter divider, key slide).
 
-Done when: `show_screenshot` is `true` or `false` and consistent with `kind`, `edited_image` and `assets`.
+Done when: `show_screenshot` is `true` or `false` and consistent with `kind` and `assets`.
 
 ## 4. Re-create non-text content
 
@@ -107,7 +108,7 @@ Done when: every re-created item exists, was compared with the slide by looking 
 
 ## 5. Look at the image and fix it with ImageMagick
 
-Do this only when `show_screenshot` is `true` (step 3). The article shows only the edited image; the original stays untouched.
+Do this for every slide, whatever `show_screenshot` (step 3). The article shows only the edited image; the original stays untouched.
 
 Look first: read the image and name the defects (too dark or bright, color cast, low contrast, washed-out, skew, noisy, soft, a speaker or webcam inset at `OVERLAY` or visible elsewhere). Choose the smallest set of operations that fixes exactly those. Typical operations:
 
@@ -126,7 +127,7 @@ Rules:
   - On a textured or photographic background, copy a patch from directly below or beside the inset instead of a flat fill: `magick SLIDE \( +clone -crop WxH+X+Y +repage \) -geometry +X0+Y0 -composite OUT`. A flat fill shows as a lighter block.
 - Fix defects of the recording (exposure, cast, haze), not the slide's design: a deliberately dark or colored slide stays that way. Aim for a natural look, no extreme values.
 - Look at the result. If it got worse, redo from the original and log the new command (the fragment keeps the failed attempt, marked `# slide NNNN: discarded`, and you may rewrite your own fragment).
-- A slide with `show_screenshot: false` gets no edited image, no log lines and no `images/` file.
+- A live speaker standing in front of a projected slide is not an inset: leave it.
 
 Done when: `$OUT/images/NNNN.png` exists, was looked at and is better than the original (or a copy when it had no defect), and every command that produced it is in `LOG`.
 
@@ -162,7 +163,7 @@ unspoken:
 
 Rules:
 
-- The seven keys `slide`, `time`, `image`, `kind`, `show_screenshot`, `assets`, `unspoken` appear in the order shown; `edited_image` goes after `assets` and appears only when `show_screenshot` is `true`. `assets: []` when nothing was re-created.
+- The seven keys `slide`, `time`, `image`, `kind`, `show_screenshot`, `assets`, `unspoken` appear in the order shown; `edited_image` goes after `assets` and is always present. `assets: []` when nothing was re-created.
 - `image` is `SLIDE` as passed to you. `assets` and `edited_image` paths are relative to `OUT`. List only files that stay (no temp files). Every listed file exists.
 - Body: the slide text as read in step 1, in reading order, as Markdown. The slide title is a `#` heading. Re-created code, formulas and tables stand in place of their original. For a diagram, add after the text a short description of nodes and relations (`A -> B: label`; for charts: what each curve does) so a reader without the image can follow it. For a non-text picture (photo, portrait, illustration), add one neutral line `[Image: <what is visible>]`; a slide with only pictures has only these lines. No other commentary, no interpretation.
 - `meme: true` goes right after `show_screenshot` and only on slides that show a meme; other notes have no `meme` key. Such a note has `show_screenshot: true` and an `edited_image`.
@@ -176,7 +177,7 @@ Verify, then fix what fails:
 
 1. `SLIDE` unchanged: `md5 -r "$SLIDE"` equals the value from the start.
 2. Every `assets` and `edited_image` file exists; `.drawio` files have a matching export.
-3. `LOG` holds the commands of this slide's edit (or does not exist when `show_screenshot` is false).
+3. `LOG` holds the commands of this slide's edit.
 4. You created no files outside `$OUT`, `$NOTES` and `LOG` except temp files, which you delete.
 
 Report in at most 8 lines (add notes on unclear parts of this brief only when the caller asks for them): slide number, kind, show_screenshot, files written, defects fixed in the image, items you could not read or re-create faithfully, and which check failed (if any).
