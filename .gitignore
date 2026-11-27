@@ -4,5 +4,4 @@ __pycache__/
 testdata/talks/*/video.mp4
 testdata/talks/*/deck.pptx
 testdata/talks/*/deck.pdf
-testdata/talks/*/video-*/
 .DS_Store
