@@ -76,7 +76,7 @@ Export next to it:
 drawio -x -f svg -e -b 10 -o "$OUT/diagrams/NNNN-<short-name>.svg" "$OUT/diagrams/NNNN-<short-name>.drawio"
 ```
 
-To compare, export a PNG into a temp dir below the run's `work/` (`TMP="$(dirname "$NOTES")/tmp"; mkdir -p "$TMP"`) and read it (the SVG uses `light-dark()` colors that ImageMagick and the image reader do not render; keep the SVG as the article asset):
+To compare, export a PNG into a temp dir below the run's `work/` (`TMP="$(dirname "$NOTES")/tmp/NNNN"; mkdir -p "$TMP"`, one folder per slide because slide agents run in parallel; remove it when done) and read it (the SVG uses `light-dark()` colors that ImageMagick and the image reader do not render; keep the SVG as the article asset):
 
 ```bash
 drawio -x -f png -b 10 -o "$TMP/NNNN-check.png" "$OUT/diagrams/NNNN-<short-name>.drawio"

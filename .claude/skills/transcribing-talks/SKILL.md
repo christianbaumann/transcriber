@@ -24,7 +24,7 @@ Paths (resolve to absolute paths first):
 | `RUN` | `out/<NAME>/` in the repository root |
 | `OUT` | `$RUN/article/` (create it) |
 | `SLICES` | `$RUN/slices/` (the slicer exports here; its own default is not used) |
-| `WORK` | `$RUN/work/` (create it). Holds `slide-excerpts/`, `slides/` (slide notes), `imagemagick/` (per-slide log fragments), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Kept after the run; report its path |
+| `WORK` | `$RUN/work/` (create it). Holds `slide-excerpts/`, `slides/` (slide notes), `imagemagick/` (per-slide log fragments), `tmp/NNNN/` (per-slide scratch files), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Kept after the run; report its path |
 
 Scripts need `uv` and are called as `$SCRIPTS/<name>.py` (PEP 723). If transcription cannot download the model because `~/.cache/huggingface/hub` is unavailable, set `HF_HUB_CACHE` to a writable folder; `mlx_whisper` exits 0 on that failure, so check that `whisper.json` exists.
 
