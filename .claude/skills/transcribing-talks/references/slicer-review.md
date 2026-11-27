@@ -7,6 +7,7 @@ The orchestrator passes the inputs as absolute paths.
 | Name | Meaning |
 |---|---|
 | `VIDEO` | The video file. |
+| `SLICES` | Output folder for the slices: `out/<NAME>/slices/`. Create it if missing. |
 | `SLICER` | `.claude/skills/video-slicer/` in this repository (holds `SKILL.md` and `scripts/`). |
 | `WHISPER` | `whisper.json` of the video. |
 | `TRANSCRIPT_PY` | `transcribing-talks/scripts/transcript.py`. |
@@ -25,6 +26,6 @@ The orchestrator passes the inputs as absolute paths.
    - Live demo frames (IDE, terminal, browser filling the shared screen): keep the candidate when its excerpt shows that the speaker refers to it, for example "here in the IDE", "as you can see", or an explanation of what is on screen. Drop it when the excerpt does not refer to the screen.
    - All other rules of the slicer's step 5 apply in full (frames without a slide, repeats, earlier steps of a build, keep every other candidate).
    - Name the excerpt as the reason for every kept demo frame and for every dropped one.
-4. Run the slicer's step 6 (export) to the default `<video>-slices/` next to `VIDEO`, then remove the work directory.
+4. Run the slicer's step 6 (export) with `--output "$SLICES"` (not the default `<video>-slices/` next to `VIDEO`), then remove the work directory.
 
 Reply with: output path, crop box, overlay (`WxH+X+Y` in slice pixels, or `none`), candidate count, kept count, kept demo frames (number, time, what the speaker says about it), dropped candidates with reasons, layout warnings.

@@ -8,9 +8,9 @@ Needs `magick` (ImageMagick 7), `tesseract`, `drawio`, `mmdc` (only when a diagr
 
 | Name | Meaning |
 |---|---|
-| `SLIDE` | Slide PNG `<video>-slices/NNNN_HH-MM-SS.png`. Never modify or move it. |
+| `SLIDE` | Slide PNG `out/<NAME>/slices/NNNN_HH-MM-SS.png`. Never modify or move it. |
 | `EXCERPT` | Text file with the transcript of the time range in which this slide is shown. |
-| `OUT` | Article folder (`<video>-article/`). Write only below it. |
+| `OUT` | Article folder (`out/<NAME>/article/`). Write only below it. |
 | `NOTES` | Folder for slide notes (work files). The note goes to `$NOTES/NNNN.md`. |
 | `LOG` | Absolute path of your own log fragment `<WORK>/imagemagick/NNNN.log` (the orchestrator merges the fragments). |
 | `OVERLAY` | Speaker or webcam inset on most slides, as `WxH+X+Y` in the pixels of `SLIDE`, or `none`. |
@@ -76,7 +76,7 @@ Export next to it:
 drawio -x -f svg -e -b 10 -o "$OUT/diagrams/NNNN-<short-name>.svg" "$OUT/diagrams/NNNN-<short-name>.drawio"
 ```
 
-To compare, export a PNG into a temp dir (`TMP=$(mktemp -d)`) and read it (the SVG uses `light-dark()` colors that ImageMagick and the image reader do not render; keep the SVG as the article asset):
+To compare, export a PNG into a temp dir below the run's `work/` (`TMP="$(dirname "$NOTES")/tmp"; mkdir -p "$TMP"`) and read it (the SVG uses `light-dark()` colors that ImageMagick and the image reader do not render; keep the SVG as the article asset):
 
 ```bash
 drawio -x -f png -b 10 -o "$TMP/NNNN-check.png" "$OUT/diagrams/NNNN-<short-name>.drawio"

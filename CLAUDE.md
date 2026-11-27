@@ -8,7 +8,7 @@ Design and tasks exist under `.agents/changes/2026-11-26-talk-to-article/` and `
 
 ## Dependencies on sibling projects
 
-- **Slicing:** https://github.com/christianbaumann/video-slicer (skill `video-slicer`). Output `<video>-slices/NNNN_HH-MM-SS.png`; the timestamp is when the slide appears, which is what aligns images with the transcript.
+- **Slicing:** https://github.com/christianbaumann/video-slicer (skill `video-slicer`). Default output `<video>-slices/NNNN_HH-MM-SS.png`, the orchestrator passes `out/<name>/slices/` via `export.py --output`; the timestamp is when the slide appears, which is what aligns images with the transcript.
 - **YouTube download:** same approach as `/Users/christian.baumann/git_repos/_own/music-transcriber/.claude/skills/downloading-youtube-video/SKILL.md`. Core command (from repo root, URL single-quoted):
   ```bash
   uvx 'yt-dlp[default]@latest' --no-playlist -S res --merge-output-format mp4/mkv \
@@ -41,7 +41,7 @@ User-visible behavior (output layout and formats, article language, info area, r
 - **Slide reading:** Claude reads each slide image; `tesseract` OCR as cross-check for small text
 - **Per-slide brief:** `.claude/skills/transcribing-talks/references/slide-processing.md`; the orchestrator passes `SLIDE`, `EXCERPT`, `OUT` (article folder), `NOTES` as absolute paths; one subagent per slide writes `$NOTES/NNNN.md`
 - **Article briefs:** `.claude/skills/transcribing-talks/references/article-writing.md` holds the outline, chapter and edit briefs; the orchestrator passes `TRANSCRIPT`, `NOTES`, `OUT`, `WORK`, `LANGUAGE` (plus `OUTLINE`, `EXCERPT`, `CHAPTER_FILE`, `INFO`, `ARTICLE` per brief) as absolute paths. `transcript.py --excerpt` has no slide markers, so chapter writers also read the range in `transcript.md`.
-- **Image editing:** article uses the edited images; originals stay in `<video>-slices/`; every ImageMagick command is logged
+- **Image editing:** article uses the edited images; originals stay in `out/<name>/slices/`; every ImageMagick command is logged
 - **Review pass:** after approval, the original screenshots of re-created items stay in a reference folder
 - **Speaker inset:** the slicer agent crops a webcam overlay out when it can, else reports it as `overlay` (`WxH+X+Y` in slice pixels); the orchestrator passes it as `OVERLAY` to the slide agents, which fill it with the background in edited images when it covers no slide content
 - **Concurrency:** `MAX_PARALLEL = 6` subagents at once (per-slide, per-chapter); fixes after the review run one after another because they edit `article.md`

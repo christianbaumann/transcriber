@@ -34,11 +34,14 @@ You are asked twice along the way:
 
 ## Output
 
-A folder `<video>-article/` next to the video; for a YouTube URL next to the download under `out/youtube/`. It holds:
+One folder `out/<name>/` in the repository per run (YouTube downloads stay in `out/youtube/`). `<name>` is the video file name in kebab-case; for generic names such as `video` it is the parent folder's name, and if `out/<name>/` exists the skill asks whether to overwrite it or use `<name>-2`. Nothing is written outside `out/`. The folder has three subfolders:
 
-- `transcript.md`: the spoken word, a `[HH:MM:SS]` timestamp per paragraph, markers where a slide appears; plus the raw `whisper.json`
-- `article.md` and `article.html` (a single self-contained file, images embedded)
-- the edited images, re-created diagrams with their draw.io sources, the original screenshots for reference, and a log of every image edit
+- `article/`:
+  - `transcript.md`: the spoken word, a `[HH:MM:SS]` timestamp per paragraph, markers where a slide appears; plus the raw `whisper.json`
+  - `article.md` and `article.html` (a single self-contained file, images embedded)
+  - the edited images, re-created diagrams with their draw.io sources, the original screenshots for reference, and a log of every image edit
+- `slices/`: the original slide screenshots from the video
+- `work/`: slide notes, outline, chapter drafts and review answers, kept for debugging
 
 Diagrams are redrawn with draw.io by default (Mermaid where it fits better). Code becomes code blocks, formulas LaTeX, tables Markdown tables. Speaker webcam insets are removed from screenshots where they cover no slide content. Screenshots of re-created content are replaced by the re-creation. Slide images appear for the title slide, each chapter's opening slide (a "Chapter 2" slide or a picture that opens a topic), key slides, memes, and photos or tool screenshots the text refers to; other decorative photos are left out.
 

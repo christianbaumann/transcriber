@@ -5,7 +5,7 @@ description: Turns a video of a talk, lecture or conference session (local file 
 
 # Transcribing talks
 
-Input: a video file or one YouTube URL. Output: `<video>-article/` next to the video (for a YouTube URL next to the download in `out/youtube/`), as described in the repository's README. Two user gates: the info area and the review page.
+Input: a video file or one YouTube URL. Output: `out/<NAME>/{article,slices,work}/` in the repository, as described in the repository's README. The skill writes nothing outside `out/`. Two user gates: the info area and the review page.
 
 Run commands from the repository root. Constants:
 
@@ -20,9 +20,11 @@ Paths (resolve to absolute paths first):
 | `SCRIPTS` | `$SKILL/scripts` |
 | `REFS` | `$SKILL/references` |
 | `VIDEO` | The video file |
-| `OUT` | `<VIDEO without extension>-article/` (create it) |
-| `SLICES` | `<VIDEO without extension>-slices/` (the slicer's default) |
-| `WORK` | `mktemp -d`. Holds `slide-excerpts/`, `slides/` (slide notes), `imagemagick/` (per-slide log fragments), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Keep it until the end; report its path |
+| `NAME` | Run name, chosen in step 0 |
+| `RUN` | `out/<NAME>/` in the repository root |
+| `OUT` | `$RUN/article/` (create it) |
+| `SLICES` | `$RUN/slices/` (the slicer exports here; its own default is not used) |
+| `WORK` | `$RUN/work/` (create it). Holds `slide-excerpts/`, `slides/` (slide notes), `imagemagick/` (per-slide log fragments), `outline.md`, `chapter-excerpts/`, `chapters/`, `info.json`, `review/`. Kept after the run; report its path |
 
 Scripts need `uv` and are called as `$SCRIPTS/<name>.py` (PEP 723). If transcription cannot download the model because `~/.cache/huggingface/hub` is unavailable, set `HF_HUB_CACHE` to a writable folder; `mlx_whisper` exits 0 on that failure, so check that `whisper.json` exists.
 
@@ -32,7 +34,15 @@ Scripts need `uv` and are called as `$SCRIPTS/<name>.py` (PEP 723). If transcrip
 - A URL: it names exactly one video (else ask for a single-video URL).
 - The user may name the article language ("auf Deutsch"). Otherwise it is decided in step 2.
 
-Done when `VIDEO` (or the URL) is settled and `OUT` and `WORK` exist.
+Done when `VIDEO` (or the URL) is settled. For a URL, `VIDEO` is known after step 1: do the next part there.
+
+Run name and folders (once `VIDEO` is a file):
+
+1. `NAME`: the file stem of `VIDEO` in kebab-case (lower case; every run of other characters becomes one `-`; no leading or trailing `-`). Example: `Some_Talk-[abc].mp4` gives `some-talk-abc`.
+2. If the stem is generic (`video`, `recording`, `export`) or `out/<NAME>/` exists, `NAME` is the name of the folder that holds `VIDEO`, in kebab-case. If that is generic or taken too (for a download the folder is `youtube`), ask the user for a name.
+3. If the chosen `out/<NAME>/` exists (a re-run): ask the user whether to overwrite it or to use `<NAME>-2`. Never overwrite without the answer: the old run holds review answers and edited images that are costly to redo.
+
+Done when `OUT` and `WORK` exist under `out/<NAME>/` (`SLICES` is created by the slicer in step 3).
 
 ## 1. Download (URL only)
 
@@ -40,7 +50,7 @@ One subagent. Brief:
 
 > Read `<repo>/.claude/skills/downloading-youtube-video/SKILL.md` and follow it for `<url>`, working in `<repo>`. Add no format or cookie options. Reply with the video path and the `.info.json` path.
 
-Done when both files exist. A failure goes to the user unchanged. `VIDEO` is now the downloaded file; `YT_INFO` is the `.info.json` (yt-dlp's file, not the info area's `info.json` of step 6).
+Done when both files exist. A failure goes to the user unchanged. `VIDEO` is now the downloaded file (it stays in `out/youtube/`); choose `NAME` and create the folders as in step 0; `YT_INFO` is the `.info.json` (yt-dlp's file, not the info area's `info.json` of step 6).
 
 ## 2. Transcribe
 
@@ -58,7 +68,7 @@ Done when `$OUT/whisper.json` exists and `LANGUAGE` is `English` or `German`.
 
 One subagent. Brief:
 
-> Read `<REFS>/slicer-review.md` and follow it. `VIDEO` = `<abs>`, `SLICER` = `<repo>/.claude/skills/video-slicer`, `WHISPER` = `<OUT>/whisper.json`, `TRANSCRIPT_PY` = `<SCRIPTS>/transcript.py`.
+> Read `<REFS>/slicer-review.md` and follow it. `VIDEO` = `<abs>`, `SLICES` = `<SLICES>`, `SLICER` = `<repo>/.claude/skills/video-slicer`, `WHISPER` = `<OUT>/whisper.json`, `TRANSCRIPT_PY` = `<SCRIPTS>/transcript.py`.
 
 Its reply names the crop box and an `overlay` (a speaker or webcam inset it could not crop out, as `WxH+X+Y` in slice pixels, or `none`). Keep it as `OVERLAY` for step 5.
 
@@ -172,11 +182,11 @@ $SCRIPTS/build_html.py "$OUT/article.md" --out "$OUT/article.html"
 
 Checks:
 
-- `article.md` mentions no path under `$SLICES`, `reference/`, and no absolute path (`grep -nE 'reference/|-slices/|/Users/'` finds nothing). Review screenshots live only in `$OUT/reference/`.
+- `article.md` mentions no path under `$SLICES`, `reference/`, and no absolute path (`grep -nE 'reference/|slices/|/Users/'` finds nothing). Review screenshots live only in `$OUT/reference/`.
 - Every image path in `article.md` exists below `$OUT`.
 - `transcript.md` and `article.md` differ in structure: the article has the info area and `##` chapters.
 - `build_html.py` needs network for KaTeX (see CLAUDE.md); if it fails, report the error and leave `article.md` as the result.
 
-Report to the user: `$OUT` path, the files present (`article.md`, `article.html`, `transcript.md`, `whisper.json`, `images/`, `diagrams/`, `reference/`, `imagemagick.log`), `$SLICES` and `$WORK`, language, slide and chapter counts, slides with unreadable items, fixes applied.
+Report to the user: `$OUT` path, the files present (`article.md`, `article.html`, `transcript.md`, `whisper.json`, `images/`, `diagrams/`, `reference/`, `imagemagick.log`), `$SLICES` and `$WORK` (all under `out/<NAME>/`), language, slide and chapter counts, slides with unreadable items, fixes applied.
 
 Done when `article.html` exists and the report names every path.

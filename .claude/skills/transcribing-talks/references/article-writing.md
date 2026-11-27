@@ -8,7 +8,7 @@ Shared inputs:
 |---|---|
 | `TRANSCRIPT` | `transcript.md`: `[HH:MM:SS]` per paragraph, `→ slide NNNN` markers where a slide appears. |
 | `NOTES` | Folder with slide notes `NNNN.md` (format in `slide-processing.md`, step 7). |
-| `OUT` | Article folder (`<video>-article/`). Image and diagram paths in the article are relative to it. Never write below it except where a brief says so. |
+| `OUT` | Article folder (`out/<NAME>/article/`). Image and diagram paths in the article are relative to it. Never write below it except where a brief says so. |
 | `WORK` | Work folder: `outline.md`, `chapters/NN.md`. |
 | `LANGUAGE` | `English` or `German`. The orchestrator decides (the talk's language if it is one of the two, else the user's choice). Write all prose in it, whatever the transcript's language. |
 
