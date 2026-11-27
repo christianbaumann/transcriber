@@ -5,7 +5,7 @@ description: Turns a video of a talk, lecture or conference session (local file 
 
 # Transcribing talks
 
-Input: a video file or one YouTube URL. Output: `out/<NAME>/{article,slices,work}/` in the repository, as described in the repository's README. The skill writes nothing outside `out/`. Two user gates: the info area and the review page.
+Input: a video file or one YouTube URL. Output: `out/<NAME>/{article,slices,work}/` in the repository, as described in the repository's README. The skill writes no run output outside `out/`. Two user gates: the info area and the review page.
 
 Run commands from the repository root. Constants:
 
@@ -39,10 +39,10 @@ Done when `VIDEO` (or the URL) is settled. For a URL, `VIDEO` is known after ste
 Run name and folders (once `VIDEO` is a file):
 
 1. `NAME`: the file stem of `VIDEO` in kebab-case (lower case; every run of other characters becomes one `-`; no leading or trailing `-`). Example: `Some_Talk-[abc].mp4` gives `some-talk-abc`.
-2. If the stem is generic (`video`, `recording`, `export`) or `out/<NAME>/` exists, `NAME` is the name of the folder that holds `VIDEO`, in kebab-case. If that is generic or taken too (for a download the folder is `youtube`), ask the user for a name.
-3. If the chosen `out/<NAME>/` exists (a re-run): ask the user whether to overwrite it or to use `<NAME>-2`. Never overwrite without the answer: the old run holds review answers and edited images that are costly to redo.
+2. If the stem is generic (`video`, `recording`, `export`) or empty after kebab-casing, `NAME` is the name of the folder that holds `VIDEO`, in kebab-case. If that is generic or empty too (for a download the folder is `youtube`), ask the user for a name.
+3. If `out/<NAME>/` exists (a re-run), ask the user: overwrite it, use `<NAME>-2`, or give another name. A given name that is taken gets the same question. Never overwrite without the answer: the old run holds review answers and edited images that are costly to redo.
 
-Done when `OUT` and `WORK` exist under `out/<NAME>/` (`SLICES` is created by the slicer in step 3).
+Done when `OUT` and `WORK` exist under `out/<NAME>/` (`SLICES` is created by the slicer in step 3). For a URL, the folders are created after step 1.
 
 ## 1. Download (URL only)
 

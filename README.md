@@ -34,7 +34,7 @@ You are asked twice along the way:
 
 ## Output
 
-One folder `out/<name>/` in the repository per run (YouTube downloads stay in `out/youtube/`). `<name>` is the video file name in kebab-case; for generic names such as `video` it is the parent folder's name, and if `out/<name>/` exists the skill asks whether to overwrite it or use `<name>-2`. Nothing is written outside `out/`. The folder has three subfolders:
+One folder `out/<name>/` in the repository per run (YouTube downloads stay in `out/youtube/`). `<name>` is the video file name in kebab-case; for a generic name such as `video` it is the parent folder's name. If `out/<name>/` exists, the skill asks whether to overwrite it, use `<name>-2` or take another name. No run output is written outside `out/`. The folder has three subfolders:
 
 - `article/`:
   - `transcript.md`: the spoken word, a `[HH:MM:SS]` timestamp per paragraph, markers where a slide appears; plus the raw `whisper.json`
